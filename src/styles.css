@@ -1928,7 +1928,7 @@ html:not(.js) .js-only { display: none !important; }
   font-size: 8.5px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(242, 238, 227, 0.48);
+  color: rgba(242, 238, 227, 0.62);
   margin-bottom: 3px;
 }
 
@@ -1947,7 +1947,7 @@ html:not(.js) .js-only { display: none !important; }
   font-size: 8.5px;
   line-height: 1.6;
   letter-spacing: 0.04em;
-  color: rgba(242, 238, 227, 0.5);
+  color: rgba(242, 238, 227, 0.62);
 }
 
 /* ---------------------------------------------------------- responsive */
