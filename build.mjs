@@ -4,11 +4,13 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   loadRings, worldLandPath, horizonPath, worldGraticule, regionalPlate,
-  normalizeBbox, worldMarkers, formatBounds, WORLD_H, WORLD_W,
+  normalizeBbox, fitFrame, miniPlate, worldMarkers, formatBounds, project,
+  WORLD_H, WORLD_W,
 } from "./src/map.mjs";
 
 const ROOT = path.dirname(decodeURIComponent(new URL(import.meta.url).pathname).replace(/^\/([A-Za-z]:)/, "$1"));
 const OUT = path.join(ROOT, "site");
+const SITE = "https://political-geography-v2.vercel.app";
 const content = JSON.parse(fs.readFileSync(path.join(ROOT, "content.json"), "utf8"));
 const geo = JSON.parse(fs.readFileSync(path.join(ROOT, "assets", "data", "ne_110m_land.geojson"), "utf8"));
 const rings = loadRings(geo);
@@ -21,58 +23,97 @@ const readingCount = seminars.reduce((n, s) => n + s.reading.length, 0);
 
 // ---------------------------------------------------------------- maps
 
-const TAG_SIDE = { 1: "right", 2: "up", 3: "left", 4: "right", 5: "down", 6: "down", 7: "right", 8: "left" };
+const TAG_SIDE = { 1: "dl", 2: "ul", 3: "r", 4: "l", 5: "dr", 6: "r", 7: "d", 8: "ur" };
 
-function worldPlate(root) {
+// One copy of every drawing per page, reused by the cards and the world plate.
+const thumbData = new Map(seminars.map((s) => {
+  if (s.n === seminars.length) {
+    const p = project(s.marker[0], s.marker[1]);
+    return [s.n, {
+      href: "#world-land",
+      viewBox: `0 0 ${WORLD_W} ${WORLD_H.toFixed(2)}`,
+      x: 0, y: 0, w: WORLD_W, h: WORLD_H,
+      cx: p.x,
+      cy: p.y,
+      r: WORLD_W * 0.007,
+    }];
+  }
+  const { bbox } = normalizeBbox(s);
+  const fit = fitFrame(bbox, s.marker);
+  const m = miniPlate(rings, fit.bbox, s.marker);
+  return [s.n, {
+    href: `#thumb-${pad(s.n)}`,
+    viewBox: m.viewBox,
+    x: m.x, y: m.y, w: m.width, h: m.height,
+    cx: m.marker.px,
+    cy: m.marker.py,
+    r: m.width * 0.012,
+  }];
+}));
+
+function mapSprite() {
+  const symbols = seminars.filter((s) => s.n !== seminars.length).map((s) => {
+    const { bbox } = normalizeBbox(s);
+    const m = miniPlate(rings, fitFrame(bbox, s.marker).bbox, s.marker);
+    return `<symbol id="thumb-${pad(s.n)}" viewBox="${m.viewBox}" preserveAspectRatio="xMidYMid meet"><path d="${m.land}"/></symbol>`;
+  }).join("");
+  return `<svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false"><symbol id="world-land" viewBox="0 0 ${WORLD_W} ${WORLD_H.toFixed(2)}" preserveAspectRatio="xMidYMid meet"><path d="${worldLandPath(rings, 0.9)}"/></symbol>${symbols}</svg>`;
+}
+
+function worldPlate(root, current = 0, withIndex = false) {
   const marks = worldMarkers(seminars);
+  const hint = withIndex
+    ? "Наведите на точку или выберите строку ниже"
+    : "Наведите на точку, чтобы увидеть кейс";
   const pins = marks.map((m) => {
     const s = seminars[m.n - 1];
-    return `<a class="pin pin--${TAG_SIDE[m.n]}" style="--x:${m.x.toFixed(2)}%;--y:${m.y.toFixed(2)}%" href="${root}seminars/${s.slug}.html" data-n="${m.n}" aria-label="Семинар ${pad(m.n)}. ${e(s.place)}. ${e(s.title)}"><span class="pin-dot"></span><span class="pin-tag" aria-hidden="true">${pad(m.n)}</span></a>`;
+    const cur = s.n === current ? " is-current" : "";
+    return `<a class="pin pin--${TAG_SIDE[m.n]}${cur}" style="--x:${m.x.toFixed(2)}%;--y:${m.y.toFixed(2)}%" href="${root}seminars/${s.slug}/" data-n="${s.n}" data-label="${pad(s.n)} · ${e(s.place)} — ${e(s.title)}" aria-label="Семинар ${pad(s.n)}. ${e(s.place)}. ${e(s.title)}"><span class="pin-dot"></span><span class="pin-tag" aria-hidden="true">${pad(s.n)}</span></a>`;
   }).join("\n      ");
 
   return `<figure class="plate plate--world">
-  <figcaption class="plate-bar"><span>Съёмка 00 · Мир</span><span>Проекция Робинсона · сетка 30°</span></figcaption>
+  <figcaption class="plate-bar"><span>${current ? `Съёмка ${pad(current)} · ${e(seminars[current - 1].place)}` : "Съёмка 00 · Мир"}</span><span>Проекция Робинсона · сетка 30°</span></figcaption>
   <div class="world-stage" role="group" aria-label="Карта мира с восемью точками семинаров">
-    <svg viewBox="0 0 ${WORLD_W} ${WORLD_H.toFixed(2)}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+    <svg class="map-svg" viewBox="0 0 ${WORLD_W} ${WORLD_H.toFixed(2)}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
       <path class="m-horizon" d="${horizonPath()}"/>
       <path class="m-grat" d="${worldGraticule()}"/>
-      <path class="m-land" d="${worldLandPath(rings)}"/>
+      <use href="#world-land" x="0" y="0" width="${WORLD_W}" height="${WORLD_H.toFixed(2)}"/>
     </svg>
     ${pins}
   </div>
+  <p class="plate-readout"><span class="mono" aria-hidden="true">Точка</span><span class="readout-text" id="map-readout">${hint}</span></p>
   <div class="plate-bar plate-bar--foot"><span>${e(hero.plate_caption)}</span><span>8 точек · 8 семинаров</span></div>
 </figure>`;
 }
 
-function regionalPlateHTML(s, root) {
+function regionalPlateHTML(s) {
   const { bbox, fixed } = normalizeBbox(s);
   if (fixed) console.warn(`bbox ${s.slug}: source frame adjusted to contain marker -> ${bbox.join(",")}`);
-  const p = regionalPlate(rings, bbox, s.marker);
-  const ar = p.ratio.toFixed(4);
-  const html = `<figure class="plate plate--region" style="--ar:${ar}">
+  const fit = fitFrame(bbox, s.marker);
+  const p = regionalPlate(rings, fit.bbox, s.marker);
+  return `<figure class="plate plate--region" style="--ar:${p.ratio.toFixed(4)}">
   <figcaption class="plate-bar"><span>Кадр ${pad(s.n)} · ${e(s.place)}</span><span>${e(s.coords)}</span></figcaption>
-  <div class="stage" style="--ar:${ar};aspect-ratio:${ar}" role="img" aria-label="Региональная карта. ${e(s.place)}. Координаты ${e(s.coords)}. Рамка ${e(formatBounds(bbox)).replace(/\.$/, "")}.">
-    <svg viewBox="${p.viewBox}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+  <div class="stage" style="aspect-ratio:${p.ratio.toFixed(4)}" role="img" aria-label="Региональная карта. ${e(s.place)}. Рамка ${e(formatBounds(fit.bbox))}.">
+    <svg class="map-svg" viewBox="${p.viewBox}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
       <path class="m-grat" d="${p.grat}"/>
       <path class="m-land" d="${p.land}"/>
       <path class="m-frame" d="${p.frame}"/>
     </svg>
     <span class="pin pin--site" style="--x:${p.marker.x.toFixed(3)}%;--y:${p.marker.y.toFixed(3)}%"><span class="pin-dot"></span></span>
   </div>
-  <div class="plate-bar plate-bar--foot"><span>${e(formatBounds(bbox))}</span><span>Робинсон · сетка ${p.lonStep}° / ${p.latStep}°</span></div>
+  <div class="plate-bar plate-bar--foot"><span>${e(formatBounds(fit.bbox))}</span><span>Робинсон · сетка ${p.lonStep}° / ${p.latStep}°</span></div>
 </figure>`;
-  return { html, portrait: p.ratio < 1 };
 }
 
 // ---------------------------------------------------------------- layout
 
 const NAV = [
   ["", "Главная", "home"],
-  ["course.html", "Дисциплина", "discipline"],
-  ["seminars/index.html", "Семинары", "seminars"],
-  ["method.html", "Методика", "methodology"],
-  ["artifacts.html", "Артефакты", "artifacts"],
-  ["reading.html", "Литература", "literature"],
+  ["course/", "Дисциплина", "discipline"],
+  ["seminars/", "Семинары", "seminars"],
+  ["method/", "Методика", "methodology"],
+  ["artifacts/", "Артефакты", "artifacts"],
+  ["reading/", "Литература", "literature"],
 ];
 
 function header(root, active) {
@@ -105,13 +146,15 @@ function footer(root) {
       <div><dt>Подразделение</dt><dd>${e(meta.institution)}</dd></div>
       <div><dt>Семестр</dt><dd>${e(meta.semester)}</dd></div>
       <div><dt>Аудитория</dt><dd>${e(meta.audience)}</dd></div>
+      <div><dt>Контактная работа</dt><dd>${e(meta.contact)}</dd></div>
     </dl>
     <p class="colophon">Карты: Natural Earth 110m, проекция Робинсона. Шрифты: Golos Text, Literata, IBM Plex Mono. Собрано из content.json.</p>
   </div>
 </footer>`;
 }
 
-function layout({ root = "/", active = "", title, description, body, pageClass = "" }) {
+function layout({ root = "/", active = "", title, description, body, pageClass = "", pagePath = "" }) {
+  const canonical = `${SITE}/${pagePath}`;
   return `<!doctype html>
 <html lang="ru">
 <head>
@@ -119,11 +162,14 @@ function layout({ root = "/", active = "", title, description, body, pageClass =
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${e(title)}</title>
 <meta name="description" content="${e(description)}">
+<link rel="canonical" href="${canonical}">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ru_RU">
 <meta property="og:site_name" content="${e(meta.title)}">
 <meta property="og:title" content="${e(title)}">
 <meta property="og:description" content="${e(description)}">
+<meta property="og:url" content="${canonical}">
+<meta name="theme-color" content="#f2eee3">
 <link rel="icon" href="${root}favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="${root}assets/fonts.css">
 <link rel="stylesheet" href="${root}assets/styles.css">
@@ -160,11 +206,19 @@ function secHead(num, label, title, opts = {}) {
 // ---------------------------------------------------------------- shared pieces
 
 function seminarCard(s, root) {
-  return `<a class="card" href="${root}seminars/${s.slug}.html" data-format="${e(s.format_key)}">
-  <span class="card-top"><span class="mono">${pad(s.n)}</span><span class="mono">${e(s.week)}</span></span>
+  const t = thumbData.get(s.n);
+  const r = t.r.toFixed(1);
+  return `<a class="card" href="${root}seminars/${s.slug}/" data-format="${e(s.format_key)}">
+  <span class="card-map" aria-hidden="true">
+    <svg viewBox="${t.viewBox}" preserveAspectRatio="xMidYMid meet" focusable="false">
+      <use href="${t.href}" x="${t.x.toFixed(1)}" y="${t.y.toFixed(1)}" width="${t.w.toFixed(1)}" height="${t.h.toFixed(1)}"></use>
+      <circle class="thumb-pin" cx="${t.cx.toFixed(1)}" cy="${t.cy.toFixed(1)}" r="${r}"></circle>
+    </svg>
+  </span>
+  <span class="card-top"><span class="mono">${e(s.week)}</span><span class="mono">${pad(s.n)} / 08</span></span>
   <h3>${e(s.title)}</h3>
   <p class="card-short">${e(s.short)}</p>
-  <span class="card-foot"><span class="tag">${e(shortFormat.get(s.format) || s.format)}</span><span class="mono">${e(s.place)}</span></span>
+  <span class="card-foot"><span class="tag">${e(shortFormat.get(s.format) || s.format)}</span><span class="mono card-place">${e(s.place)}</span></span>
 </a>`;
 }
 
@@ -217,8 +271,8 @@ function readingBlock(s) {
 function pager(s, root) {
   const prev = s.n > 1 ? seminars[s.n - 2] : null;
   const next = s.n < seminars.length ? seminars[s.n] : null;
-  const prevHref = prev ? `${root}seminars/${prev.slug}.html` : `${root}seminars/index.html`;
-  const nextHref = next ? `${root}seminars/${next.slug}.html` : `${root}seminars/index.html`;
+  const prevHref = prev ? `${root}seminars/${prev.slug}/` : `${root}seminars/`;
+  const nextHref = next ? `${root}seminars/${next.slug}/` : `${root}seminars/`;
   return `<nav class="pager" aria-label="Соседние семинары">
   <a class="pager-link pager-prev" href="${prevHref}">
     <span class="mono">${prev ? "Предыдущий" : "К списку"}</span>
@@ -242,7 +296,7 @@ function homePage() {
       <p>${e(p.text)}</p>
     </li>`).join("");
   const cards = seminars.map((s) => seminarCard(s, "/")).join("\n    ");
-  const atlasIndex = seminars.map((s) => `<li><a href="/seminars/${s.slug}.html" data-pin="${s.n}">
+  const atlasIndex = seminars.map((s) => `<li><a href="/seminars/${s.slug}/" data-pin="${s.n}" data-label="${pad(s.n)} · ${e(s.place)} — ${e(s.title)}">
       <span class="ai-n mono">${pad(s.n)}</span>
       <span class="ai-place">${e(s.place)}</span>
       <span class="ai-title">${e(s.title)}</span>
@@ -251,26 +305,27 @@ function homePage() {
   const tacts = methodology.tacts.map((t) => `<li><span class="tact-time mono">${e(t.time)}</span><h3>${e(t.title)}</h3><p>${e(t.text)}</p></li>`).join("");
   const scoreLegend = assessment.rows.map((r) => `<li><span class="mono">${e(r.weight)}</span>${e(r.component)}</li>`).join("");
   const tiles = [
-    ["course.html", "Дисциплина", "Паспорт, ритм 90 минут, таблица оценивания, правила и вопросы."],
-    ["seminars/index.html", "Семинары", "Восемь страниц: карта, вопрос, таймлайн, артефакт, источники."],
-    ["method.html", "Методика", "Три такта, шкала ICAP, восемь форматов и точки отказа."],
-    ["artifacts.html", "Артефакты", "Правила, анатомия репозитория и восемь слотов витрины."],
-    ["reading.html", "Литература", `${readingCount} источника с аннотациями, по три на семинар.`],
+    ["course/", "Дисциплина", "Паспорт, ритм 90 минут, таблица оценивания, правила и вопросы."],
+    ["seminars/", "Семинары", "Восемь страниц: карта, вопрос, таймлайн, артефакт, источники."],
+    ["method/", "Методика", "Три такта, шкала ICAP, восемь форматов и точки отказа."],
+    ["artifacts/", "Артефакты", "Правила, анатомия репозитория и восемь слотов витрины."],
+    ["reading/", "Литература", `${readingCount} источника с аннотациями, по три на семинар.`],
   ].map(([href, title, text], i) => `<a class="tile" href="/${href}"><span class="tile-n mono">${pad(i + 1)}</span><h3>${title}</h3><p>${text}</p><span class="tile-arrow" aria-hidden="true">↗</span></a>`).join("");
 
-  const body = `<section class="hero wrap">
+  const body = `${mapSprite()}
+<section class="hero wrap">
   <div class="hero-head">
     <p class="kicker mono"><span class="tick" aria-hidden="true"></span>${e(meta.kicker)}</p>
     <h1>${e(meta.title)}</h1>
     <p class="hero-sub">${e(meta.subtitle)}</p>
   </div>
   <div class="hero-body">
-    <div class="hero-copy measure">
+    <div class="hero-copy">
       <p class="lead">${e(hero.lead)}</p>
-      <p>${e(hero.thesis)}</p>
+      <p class="hero-thesis">${e(hero.thesis)}</p>
       <div class="actions">
-        <a class="btn" href="/seminars/index.html">Восемь семинаров</a>
-        <a class="btn btn--ghost" href="/course.html">Паспорт дисциплины</a>
+        <a class="btn" href="/seminars/">Восемь семинаров</a>
+        <a class="btn btn--ghost" href="/course/">Паспорт дисциплины</a>
       </div>
     </div>
     <dl class="stats">${stats}</dl>
@@ -279,14 +334,14 @@ function homePage() {
 
 <section class="atlas wrap" aria-labelledby="atlas-title">
   <h2 class="sr-only" id="atlas-title">Карта восьми семинаров</h2>
-  ${worldPlate("/")}
+  ${worldPlate("/", 0, true)}
   <ol class="atlas-index">${atlasIndex}</ol>
 </section>
 
 <section class="section wrap" id="aim">
-  ${secHead("01", "Зачем", e(aim.title))}
+  ${secHead("01", e(aim.label), e(aim.title))}
   <div class="aim-grid">
-    <div class="aim-copy measure">${aim.body.map((p) => `<p>${e(p)}</p>`).join("")}</div>
+    <div class="aim-copy">${aim.body.map((p) => `<p>${e(p)}</p>`).join("")}</div>
     <ul class="nots">${nots}</ul>
   </div>
 </section>
@@ -299,7 +354,7 @@ function homePage() {
 <section class="section wrap" id="program">
   ${secHead("03", "Программа", "Восемь семинаров")}
   <div class="seminar-grid" id="seminar-grid">${cards}</div>
-  <p class="more"><a class="text-link" href="/seminars/index.html">Все семинары с фильтром по формату <span aria-hidden="true">→</span></a></p>
+  <p class="more"><a class="text-link" href="/seminars/">Все семинары с фильтром по формату <span aria-hidden="true">→</span></a></p>
 </section>
 
 <section class="section wrap" id="method">
@@ -309,7 +364,7 @@ function homePage() {
     <div class="score-teaser-copy">
       <p class="mono">${assessment.rows.reduce((n, r) => n + Number(r.weight), 0)} баллов</p>
       <p>${e(assessment.intro)}</p>
-      <a class="text-link" href="/course.html#assessment">Таблица оценивания и правила <span aria-hidden="true">→</span></a>
+      <a class="text-link" href="/course/#assessment">Таблица оценивания и правила <span aria-hidden="true">→</span></a>
     </div>
     <div class="score-teaser-viz">
       ${scoreBar()}
@@ -329,6 +384,7 @@ function homePage() {
     active: "home",
     body,
     pageClass: "page-home",
+    pagePath: "",
   });
 }
 
@@ -364,7 +420,7 @@ function disciplinePage() {
 <section class="section wrap" id="does">
   ${secHead("02", "Границы", "Что курс делает и чего не делает")}
   <div class="does-grid">
-    <div class="measure">${aim.body.map((p) => `<p>${e(p)}</p>`).join("")}</div>
+    <div>${aim.body.map((p) => `<p>${e(p)}</p>`).join("")}</div>
     <ul class="nots">${aim.nots.map((n) => `<li>${e(n)}</li>`).join("")}</ul>
   </div>
 </section>
@@ -376,7 +432,7 @@ function disciplinePage() {
 
 <section class="section wrap" id="assessment">
   ${secHead("04", "Оценивание", "100 баллов")}
-  <p class="sec-intro measure">${e(assessment.intro)}</p>
+  <p class="sec-intro">${e(assessment.intro)}</p>
   ${assessmentTable()}
 </section>
 
@@ -395,6 +451,7 @@ function disciplinePage() {
     description: `${meta.title}: паспорт дисциплины, ритм 90 минут, оценивание на 100 баллов, правила и ответы на вопросы.`,
     active: "discipline",
     body,
+    pagePath: "course/",
   });
 }
 
@@ -414,7 +471,7 @@ function seminarsPage() {
   const cards = seminars.map((s) => seminarCard(s, "/")).join("\n    ");
 
   const body = `${pageHead({ plate: "Плата 02", title: "Семинары", lead: e(hero.thesis) })}
-
+${mapSprite()}
 <section class="section wrap" id="list">
   ${secHead("01", "Список", "Восемь семинаров")}
   <div class="filter js-only" role="group" aria-label="Фильтр по формату работы">
@@ -442,7 +499,7 @@ function seminarsPage() {
     description: `Восемь семинаров дисциплины «${meta.title}»: форматы, карты, артефакты и литература.`,
     active: "seminars",
     body,
-    root: "/",
+    pagePath: "seminars/",
   });
 }
 
@@ -472,7 +529,8 @@ function seminarPage(s) {
   const before = s.before.map((b) => `<li>${e(b)}</li>`).join("");
   const checks = qaList(s.check);
 
-  const plate = regionalPlateHTML(s, "/");
+  const isCorpus = s.n === seminars.length;
+  const plate = isCorpus ? mapSprite() + worldPlate("/", s.n) : regionalPlateHTML(s);
 
   const body = `<header class="page-head page-head--seminar wrap">
   <p class="kicker mono"><span class="tick" aria-hidden="true"></span>Кадр ${pad(s.n)} / 08 · ${e(s.week)} · ${e(s.format)}</p>
@@ -480,11 +538,11 @@ function seminarPage(s) {
   <p class="lead measure">${e(s.short)}</p>
 </header>
 
-<section class="wrap seminar-atlas${plate.portrait ? " is-portrait" : ""}">
-  ${plate.html}
+<section class="wrap seminar-atlas${isCorpus ? " is-corpus" : ""}">
+  ${plate}
   <dl class="data-strip">
     <div><dt>Место</dt><dd>${e(s.place)}</dd></div>
-    <div><dt>Координаты</dt><dd>${e(s.coords)}</dd></div>
+    <div><dt>${isCorpus ? "Схема" : "Координаты"}</dt><dd>${e(s.coords)}</dd></div>
     <div><dt>Формат</dt><dd>${e(s.format)}</dd></div>
     <div><dt>Механизм</dt><dd>${e(s.mechanism)}</dd></div>
   </dl>
@@ -500,7 +558,7 @@ function seminarPage(s) {
   <ol class="outcomes">${outcomes}</ol>
   <div class="why">
     <p class="mono">Почему такой формат</p>
-    <p class="measure">${e(s.why)}</p>
+    <p>${e(s.why)}</p>
     <p class="mono why-note">${e(s.format_note)}</p>
   </div>
 </section>
@@ -574,13 +632,12 @@ function seminarPage(s) {
 <div class="wrap">${pager(s, "/")}</div>`;
 
   return layout({
-    root: "/",
     title: `${pad(s.n)}. ${s.title} · ${meta.title}`,
     description: `${s.title}. ${s.short} Семинар ${s.n} из 8, ${s.place}.`,
     active: "seminars",
     body,
     pageClass: "page-seminar",
-    root: "/",
+    pagePath: `seminars/${s.slug}/`,
   });
 }
 
@@ -625,8 +682,7 @@ function methodologyPage() {
 
 <section class="section wrap" id="icap">
   ${secHead("02", "Шкала", e(methodology.icap.title))}
-  <p class="sec-intro measure">${e(methodology.icap.text)}</p>
-  <div class="icap-band" aria-hidden="true"><span>P</span><span>A</span><span>C</span><span>I</span></div>
+  <p class="sec-intro">${e(methodology.icap.text)}</p>
   <ol class="icap-grid">${levels}</ol>
 </section>
 
@@ -650,6 +706,7 @@ function methodologyPage() {
     description: "Три такта семинара, шкала ICAP, восемь форматов с точками отказа, правила для тридцати человек и соседи по жанру.",
     active: "methodology",
     body,
+    pagePath: "method/",
   });
 }
 
@@ -664,7 +721,7 @@ function artifactsPage() {
     return `<li><span class="file">${e(file)}</span>${desc ? `<span class="desc">${e(desc)}</span>` : ""}</li>`;
   }).join("");
   const submit = artifacts_page.submit.map((s, i) => `<li><span class="mono" aria-hidden="true">${pad(i + 1)}</span><p>${e(s)}</p></li>`).join("");
-  const slots = seminars.map((s) => `<a class="slot" href="/seminars/${s.slug}.html">
+  const slots = seminars.map((s) => `<a class="slot" href="/seminars/${s.slug}/">
       <span class="slot-top mono"><span>Слот ${pad(s.n)}</span><span>${e(s.artifact.repo)}</span></span>
       <h3>${e(s.artifact.name)}</h3>
       <p>${e(s.title)}</p>
@@ -695,7 +752,7 @@ function artifactsPage() {
   ${secHead("04", "Витрина", "Восемь слотов")}
   <div class="showcase-note">
     <p class="mono">Курс ещё не читался</p>
-    <p class="measure">Витрина пустая: восемь слотов ниже отведены под первые работы. Заполнять их вымышленными проектами мы не стали. Пока в слоте только имя репозитория и название артефакта из программы.</p>
+    <p>Витрина пустая: восемь слотов ниже отведены под первые работы. Заполнять их вымышленными проектами мы не стали. Пока в слоте только имя репозитория и название артефакта из программы.</p>
   </div>
   <div class="slots">${slots}</div>
 </section>`;
@@ -705,6 +762,7 @@ function artifactsPage() {
     description: "Правила артефактов, анатомия репозитория и восемь пустых слотов витрины: курс ещё не читался.",
     active: "artifacts",
     body,
+    pagePath: "artifacts/",
   });
 }
 
@@ -714,7 +772,7 @@ function literaturePage() {
   const groups = seminars.map((s) => `<section class="lit-group" id="s${s.n}">
     <div class="lit-head">
       <p class="mono">Семинар ${pad(s.n)} · ${e(s.week)}</p>
-      <h2><a href="/seminars/${s.slug}.html">${e(s.title)} <span aria-hidden="true">↗</span></a></h2>
+      <h2><a href="/seminars/${s.slug}/">${e(s.title)} <span aria-hidden="true">↗</span></a></h2>
       <p class="mono lit-place">${e(s.place)}</p>
     </div>
     ${readingBlock(s)}
@@ -733,23 +791,45 @@ function literaturePage() {
     description: `Все ${readingCount} источника курса «${meta.title}» по семинарам, с аннотациями и пометкой о доступе.`,
     active: "literature",
     body,
+    pagePath: "reading/",
+  });
+}
+
+// ---------------------------------------------------------------- 404
+
+function notFoundPage() {
+  const body = `${mapSprite()}
+${pageHead({ plate: "Ошибка 404", title: "Такой точки на карте нет", lead: "Адрес не совпал ни с одной страницей курса. Ниже — восемь семинаров и разделы, из которых состоит сайт." })}
+<section class="section wrap">
+  <div class="actions">
+    <a class="btn" href="/">На главную</a>
+    <a class="btn btn--ghost" href="/seminars/">Все семинары</a>
+  </div>
+  ${worldPlate("/")}
+</section>`;
+
+  return layout({
+    title: `Страница не найдена · ${meta.title}`,
+    description: "Страница не найдена. Восемь семинаров, методика, артефакты и литература курса.",
+    active: "",
+    body,
+    pagePath: "404.html",
   });
 }
 
 // ---------------------------------------------------------------- write
 
 fs.rmSync(OUT, { recursive: true, force: true });
-fs.mkdirSync(path.join(OUT, "seminars"), { recursive: true });
-fs.mkdirSync(path.join(OUT, "assets"), { recursive: true });
 
 const pages = [
   ["index.html", homePage()],
-  ["course.html", disciplinePage()],
+  ["course/index.html", disciplinePage()],
   ["seminars/index.html", seminarsPage()],
-  ["method.html", methodologyPage()],
-  ["artifacts.html", artifactsPage()],
-  ["reading.html", literaturePage()],
-  ...seminars.map((s) => [`seminars/${s.slug}.html`, seminarPage(s)]),
+  ["method/index.html", methodologyPage()],
+  ["artifacts/index.html", artifactsPage()],
+  ["reading/index.html", literaturePage()],
+  ...seminars.map((s) => [`seminars/${s.slug}/index.html`, seminarPage(s)]),
+  ["404.html", notFoundPage()],
 ];
 
 for (const [file, html] of pages) {
@@ -758,14 +838,26 @@ for (const [file, html] of pages) {
   fs.writeFileSync(dest, html);
 }
 
+fs.mkdirSync(path.join(OUT, "assets", "fonts"), { recursive: true });
 fs.copyFileSync(path.join(ROOT, "src", "styles.css"), path.join(OUT, "assets", "styles.css"));
 fs.copyFileSync(path.join(ROOT, "src", "app.js"), path.join(OUT, "assets", "app.js"));
 fs.copyFileSync(path.join(ROOT, "assets", "fonts.css"), path.join(OUT, "assets", "fonts.css"));
 fs.copyFileSync(path.join(ROOT, "assets", "favicon.svg"), path.join(OUT, "favicon.svg"));
-fs.mkdirSync(path.join(OUT, "assets", "fonts"), { recursive: true });
 for (const f of fs.readdirSync(path.join(ROOT, "assets", "fonts"))) {
   if (f.endsWith(".woff2")) fs.copyFileSync(path.join(ROOT, "assets", "fonts", f), path.join(OUT, "assets", "fonts", f));
 }
+
+const routes = [
+  "", "course/", "seminars/", ...seminars.map((s) => `seminars/${s.slug}/`),
+  "method/", "artifacts/", "reading/",
+];
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${routes.map((r) => `  <url><loc>${SITE}/${r}</loc></url>`).join("\n")}
+</urlset>
+`;
+fs.writeFileSync(path.join(OUT, "sitemap.xml"), sitemap);
+fs.writeFileSync(path.join(OUT, "robots.txt"), `User-agent: *\nAllow: /\nSitemap: ${SITE}/sitemap.xml\n`);
 
 const bytes = pages.reduce((n, [f]) => n + fs.statSync(path.join(OUT, f)).size, 0);
 console.log(`${pages.length} pages, ${(bytes / 1024).toFixed(1)} KB of HTML`);

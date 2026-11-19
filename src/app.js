@@ -39,17 +39,31 @@
     });
   }
 
-  // Light the matching pin while a row of the atlas index is hovered.
-  var pairs = document.querySelectorAll(".atlas-index a[data-pin]");
-  Array.prototype.forEach.call(pairs, function (row) {
-    var n = row.getAttribute("data-pin");
-    var pin = document.querySelector('.pin[data-n="' + n + '"]');
-    if (!pin) return;
-    var lit = function () { pin.classList.add("is-lit"); };
-    var dim = function () { pin.classList.remove("is-lit"); };
-    row.addEventListener("mouseenter", lit);
-    row.addEventListener("mouseleave", dim);
-    row.addEventListener("focus", lit);
-    row.addEventListener("blur", dim);
-  });
+  // The world plate and the index below it are one instrument: pointing at
+  // either one names the case in the plate readout and lights the other.
+  var readout = document.getElementById("map-readout");
+  var pins = Array.prototype.slice.call(document.querySelectorAll(".pin[data-label]"));
+  var rows = Array.prototype.slice.call(document.querySelectorAll(".atlas-index a[data-pin]"));
+  var resting = readout ? readout.textContent : "";
+
+  var paint = function (label) {
+    if (readout) readout.textContent = label || resting;
+    pins.forEach(function (pin) {
+      pin.classList.toggle("is-lit", Boolean(label) && pin.getAttribute("data-label") === label);
+    });
+    rows.forEach(function (row) {
+      row.classList.toggle("is-lit", Boolean(label) && row.getAttribute("data-label") === label);
+    });
+  };
+
+  var bind = function (el) {
+    var label = function () { return el.getAttribute("data-label"); };
+    el.addEventListener("mouseenter", function () { paint(label()); });
+    el.addEventListener("mouseleave", function () { paint(null); });
+    el.addEventListener("focus", function () { paint(label()); });
+    el.addEventListener("blur", function () { paint(null); });
+  };
+
+  pins.forEach(bind);
+  rows.forEach(bind);
 })();

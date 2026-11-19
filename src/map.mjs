@@ -39,6 +39,20 @@ export function project(lon, lat) {
   };
 }
 
+// Inverse of the vertical Robinson term: which latitude sits at this y.
+function latitudeAt(y) {
+  const worldY = (WORLD_H / 2 - y) / S; // signed KY*cy
+  const target = Math.min(KY, Math.abs(worldY));
+  let lo = 0;
+  let hi = 90;
+  for (let i = 0; i < 40; i++) {
+    const mid = (lo + hi) / 2;
+    if (KY * coeff(mid)[1] < target) lo = mid;
+    else hi = mid;
+  }
+  return worldY < 0 ? -(lo + hi) / 2 : (lo + hi) / 2;
+}
+
 export function loadRings(geojson) {
   const rings = [];
   for (const f of geojson.features || []) {
@@ -95,7 +109,7 @@ function simplify(points, tol) {
   return points.filter((_, i) => keep[i]);
 }
 
-export function worldLandPath(rings) {
+export function worldLandPath(rings, tol = 0.5) {
   let d = "";
   for (const ring of rings) {
     const pts = ring.map(([lon, lat]) => project(lon, lat));
@@ -104,7 +118,7 @@ export function worldLandPath(rings) {
     if (pts.length > 2 && pts[0].x === pts[pts.length - 1].x && pts[0].y === pts[pts.length - 1].y) {
       pts.pop();
     }
-    const simple = simplify(pts, 0.5);
+    const simple = simplify(pts, tol);
     if (simple.length < 3) continue;
     d += pathFromPoints(simple);
   }
@@ -189,6 +203,18 @@ function framePoints([w, s, e, n]) {
   return pts;
 }
 
+function projectedBounds(bbox) {
+  const fp = framePoints(bbox);
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const p of fp) {
+    if (p.x < minX) minX = p.x;
+    if (p.x > maxX) maxX = p.x;
+    if (p.y < minY) minY = p.y;
+    if (p.y > maxY) maxY = p.y;
+  }
+  return { minX, maxX, minY, maxY, width: maxX - minX, height: maxY - minY };
+}
+
 function niceStep(span, target = 5) {
   const raw = span / target;
   const steps = [1, 2, 5, 10, 15, 20, 30, 45, 60];
@@ -196,13 +222,16 @@ function niceStep(span, target = 5) {
   return 60;
 }
 
+const LAT_LIMIT = 85;
+const LON_LIMIT = 179.4;
+
 export function normalizeBbox(seminar) {
   let [w, s, e, n] = seminar.bbox;
   const [lon, lat] = seminar.marker;
   const ok = (a, b, c, d) => a < c && b < d && lon >= a && lon <= c && lat >= b && lat <= d;
   if (ok(w, s, e, n)) return { bbox: [w, s, e, n], fixed: false };
   // content.json has one frame whose west and south values are transposed.
-  // The marker is the authority: swap them rather than invent a new frame.
+  // The marker is the authority: swap them rather than invent a new place.
   if (ok(s, w, e, n)) return { bbox: [s, w, e, n], fixed: true };
   return {
     bbox: [Math.min(w, lon), Math.min(s, lat), Math.max(e, lon), Math.max(n, lat)],
@@ -210,16 +239,75 @@ export function normalizeBbox(seminar) {
   };
 }
 
-export function regionalPlate(rings, bbox, marker) {
-  const [w, s, e, n] = bbox;
-  const fp = framePoints(bbox);
-  const minX = Math.min(...fp.map((p) => p.x));
-  const maxX = Math.max(...fp.map((p) => p.x));
-  const minY = Math.min(...fp.map((p) => p.y));
-  const maxY = Math.max(...fp.map((p) => p.y));
-  const width = maxX - minX;
-  const height = maxY - minY;
+// Every regional plate is a crop of the world drawing. Frames differ in
+// extent, so the shorter side is opened up until the plate reaches the
+// course's plate ratio. Near-global frames are capped at the map edge and
+// keep their wider shape instead of being stretched.
+export function fitFrame(bbox, marker, aspect = 4 / 3) {
+  let [w, s, e, n] = bbox;
+  const originalBounds = projectedBounds([w, s, e, n]);
+  let bounds = originalBounds;
+  const mp = project(marker[0], marker[1]);
 
+  // Frames come in every extent. Open the shorter side until the plate
+  // reaches the course ratio; if that would more than double the frame,
+  // trim the longer side around the site instead. A frame never loses its
+  // point and never grows past the world edge.
+  for (let i = 0; i < 8; i++) {
+    const ratio = bounds.width / bounds.height;
+    if (Math.abs(ratio - aspect) < 0.004) break;
+
+    if (ratio < aspect) {
+      const targetW = bounds.height * aspect;
+      if (targetW / bounds.width <= 2) {
+        const k = targetW / bounds.width;
+        const cx = (w + e) / 2;
+        const lonSpan = Math.min((e - w) * k, LON_LIMIT * 2);
+        w = Math.max(-LON_LIMIT, cx - lonSpan / 2);
+        e = Math.min(LON_LIMIT, cx + lonSpan / 2);
+      } else {
+        const targetH = bounds.width / aspect;
+        let top = mp.y - targetH / 2;
+        let bottom = mp.y + targetH / 2;
+        if (top < bounds.minY) { bottom += bounds.minY - top; top = bounds.minY; }
+        if (bottom > bounds.maxY) { top -= bottom - bounds.maxY; bottom = bounds.maxY; }
+        s = Math.max(s, latitudeAt(bottom));
+        n = Math.min(n, latitudeAt(top));
+      }
+    } else {
+      const targetH = bounds.width / aspect;
+      if (targetH / bounds.height <= 2) {
+        const cy = (bounds.minY + bounds.maxY) / 2;
+        s = Math.max(-LAT_LIMIT, latitudeAt(cy + targetH / 2));
+        n = Math.min(LAT_LIMIT, latitudeAt(cy - targetH / 2));
+        if (s > n) [s, n] = [n, s];
+      } else {
+        const targetW = bounds.height * aspect;
+        let left = mp.x - targetW / 2;
+        let right = mp.x + targetW / 2;
+        if (left < bounds.minX) { right += bounds.minX - left; left = bounds.minX; }
+        if (right > bounds.maxX) { left -= right - bounds.maxX; right = bounds.maxX; }
+        const k = (right - left) / bounds.width;
+        const lonSpan = (e - w) * k;
+        w = Math.max(w, marker[0] - lonSpan / 2);
+        e = Math.min(e, marker[0] + lonSpan / 2);
+      }
+    }
+    bounds = projectedBounds([w, s, e, n]);
+    if (s >= n || w >= e) break;
+  }
+
+  return {
+    bbox: [w, s, e, n].map((v) => Math.round(v * 10) / 10),
+    bounds,
+    ratio: bounds.width / bounds.height,
+    adjusted:
+      Math.abs(bounds.width - originalBounds.width) > 0.1 ||
+      Math.abs(bounds.height - originalBounds.height) > 0.1,
+  };
+}
+
+function landPathFor(rings, bbox, tol) {
   let land = "";
   for (const ring of rings) {
     const clipped = clipRing(ring, bbox);
@@ -228,13 +316,20 @@ export function regionalPlate(rings, bbox, marker) {
       clipped.pop();
     }
     const pts = clipped.map(([lon, lat]) => project(lon, lat));
-    const simple = simplify(pts, 0.7);
+    const simple = simplify(pts, tol);
     if (simple.length < 3) continue;
     land += pathFromPoints(simple);
   }
+  return land;
+}
+
+export function regionalPlate(rings, bbox, marker, opts = {}) {
+  const [w, s, e, n] = bbox;
+  const bounds = projectedBounds(bbox);
+  const land = landPathFor(rings, bbox, opts.tol || 0.6);
 
   const lonStep = niceStep(e - w, 5);
-  const latStep = niceStep(n - s, 5);
+  const latStep = niceStep(n - s, 4);
   let grat = "";
   for (let lon = Math.ceil(w / lonStep) * lonStep; lon <= e; lon += lonStep) {
     grat += "M";
@@ -251,20 +346,44 @@ export function regionalPlate(rings, bbox, marker) {
     }
   }
 
-  const frame = pathFromPoints(fp);
+  const frame = pathFromPoints(framePoints(bbox));
   const mp = project(marker[0], marker[1]);
   return {
     land,
     grat,
     frame,
-    viewBox: `${r1(minX)} ${r1(minY)} ${r1(width)} ${r1(height)}`,
-    ratio: width / height,
+    viewBox: `${r1(bounds.minX)} ${r1(bounds.minY)} ${r1(bounds.width)} ${r1(bounds.height)}`,
+    ratio: bounds.width / bounds.height,
     marker: {
-      x: ((mp.x - minX) / width) * 100,
-      y: ((mp.y - minY) / height) * 100,
+      x: ((mp.x - bounds.minX) / bounds.width) * 100,
+      y: ((mp.y - bounds.minY) / bounds.height) * 100,
     },
     lonStep,
     latStep,
+  };
+}
+
+// A card-sized copy: land and the site only, no graticule. Drawn once per
+// page as a symbol and reused, so eight thumbnails do not cost eight paths.
+export function miniPlate(rings, bbox, marker) {
+  const [w, s, e, n] = bbox;
+  const bounds = projectedBounds(bbox);
+  const land = landPathFor(rings, bbox, 0.9);
+  const mp = project(marker[0], marker[1]);
+  const box = `${r1(bounds.minX)} ${r1(bounds.minY)} ${r1(bounds.width)} ${r1(bounds.height)}`;
+  return {
+    land,
+    viewBox: box,
+    x: bounds.minX,
+    y: bounds.minY,
+    width: bounds.width,
+    height: bounds.height,
+    marker: {
+      x: ((mp.x - bounds.minX) / bounds.width) * 100,
+      y: ((mp.y - bounds.minY) / bounds.height) * 100,
+      px: mp.x,
+      py: mp.y,
+    },
   };
 }
 
@@ -292,4 +411,10 @@ function range(a, b, pos, neg) {
 
 export function formatBounds([w, s, e, n]) {
   return `${range(w, e, "в.д.", "з.д.")} · ${range(s, n, "с.ш.", "ю.ш.")}`;
+}
+
+export function formatPoint([lon, lat]) {
+  const l = `${Math.abs(lon).toFixed(1)}° ${lon >= 0 ? "в.д." : "з.д."}`;
+  const b = `${Math.abs(lat).toFixed(1)}° ${lat >= 0 ? "с.ш." : "ю.ш."}`;
+  return `${b}, ${l}`;
 }
