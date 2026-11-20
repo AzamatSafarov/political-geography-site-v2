@@ -21,33 +21,52 @@ const pad = (n) => String(n).padStart(2, "0");
 const shortFormat = new Map(methodology.formats.map((f) => [f.name, f.short]));
 const readingCount = seminars.reduce((n, s) => n + s.reading.length, 0);
 
+// ---------------------------------------------------------------- visual system
+
+// One accent per case. deep is the same hue mixed toward the ocean, used for
+// full-bleed headers; soft is the paper tint inside teacher blocks.
+const THEMES = {
+  1: { accent: "#A63A20", deep: "#6E2413", soft: "#F2D9CF" },
+  2: { accent: "#14605F", deep: "#0B4544", soft: "#D5E6E1" },
+  3: { accent: "#5E3F7E", deep: "#3E2959", soft: "#E4DAEC" },
+  4: { accent: "#7E520E", deep: "#573807", soft: "#EFE1C3" },
+  5: { accent: "#27517A", deep: "#193B5B", soft: "#D8E3EE" },
+  6: { accent: "#356848", deep: "#224C33", soft: "#DAE7DC" },
+  7: { accent: "#863049", deep: "#622033", soft: "#EFD8DE" },
+  8: { accent: "#7A4E22", deep: "#573716", soft: "#EADCC8" },
+};
+const theme = (n) => THEMES[n] || THEMES[1];
+
+const PAGE_ACCENT = {
+  home: "#A63A20",
+  discipline: "#27517A",
+  seminars: "#A63A20",
+  methodology: "#14605F",
+  artifacts: "#5E3F7E",
+  literature: "#7E520E",
+  error: "#A63A20",
+};
+
+const mark = (cls = "mark") => `<svg class="${cls}" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect width="40" height="40" fill="#0C1E2A"/><circle cx="20" cy="19" r="11" fill="none" stroke="#F6F1E7" stroke-width="1.6"/><path d="M9 19h22M20 8c5 5 5 17 0 22M20 8c-5 5-5 17 0 22" stroke="#F6F1E7" stroke-width="1" opacity=".5" fill="none"/><circle cx="27" cy="12" r="4.2" fill="#C24B2A" stroke="#0C1E2A" stroke-width="1.6"/></svg>`;
+
 // ---------------------------------------------------------------- maps
 
 const TAG_SIDE = { 1: "dl", 2: "ul", 3: "r", 4: "l", 5: "dr", 6: "r", 7: "d", 8: "ur" };
 
-// One copy of every drawing per page, reused by the cards and the world plate.
 const thumbData = new Map(seminars.map((s) => {
   if (s.n === seminars.length) {
     const p = project(s.marker[0], s.marker[1]);
     return [s.n, {
-      href: "#world-land",
-      viewBox: `0 0 ${WORLD_W} ${WORLD_H.toFixed(2)}`,
-      x: 0, y: 0, w: WORLD_W, h: WORLD_H,
-      cx: p.x,
-      cy: p.y,
-      r: WORLD_W * 0.007,
+      href: "#world-land", viewBox: `0 0 ${WORLD_W} ${WORLD_H.toFixed(2)}`,
+      x: 0, y: 0, w: WORLD_W, h: WORLD_H, cx: p.x, cy: p.y, r: WORLD_W * 0.007,
     }];
   }
   const { bbox } = normalizeBbox(s);
-  const fit = fitFrame(bbox, s.marker);
-  const m = miniPlate(rings, fit.bbox, s.marker);
+  const m = miniPlate(rings, fitFrame(bbox, s.marker).bbox, s.marker);
   return [s.n, {
-    href: `#thumb-${pad(s.n)}`,
-    viewBox: m.viewBox,
+    href: `#thumb-${pad(s.n)}`, viewBox: m.viewBox,
     x: m.x, y: m.y, w: m.width, h: m.height,
-    cx: m.marker.px,
-    cy: m.marker.py,
-    r: m.width * 0.012,
+    cx: m.marker.px, cy: m.marker.py, r: m.width * 0.012,
   }];
 }));
 
@@ -60,103 +79,153 @@ function mapSprite() {
   return `<svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false"><symbol id="world-land" viewBox="0 0 ${WORLD_W} ${WORLD_H.toFixed(2)}" preserveAspectRatio="xMidYMid meet"><path d="${worldLandPath(rings, 0.9)}"/></symbol>${symbols}</svg>`;
 }
 
-function worldPlate(root, current = 0, withIndex = false) {
+function worldStage(root, current = 0) {
   const marks = worldMarkers(seminars);
-  const hint = withIndex
-    ? "Наведите на точку или выберите строку ниже"
-    : "Наведите на точку, чтобы увидеть кейс";
   const pins = marks.map((m) => {
     const s = seminars[m.n - 1];
+    const t = theme(m.n);
     const cur = s.n === current ? " is-current" : "";
-    return `<a class="pin pin--${TAG_SIDE[m.n]}${cur}" style="--x:${m.x.toFixed(2)}%;--y:${m.y.toFixed(2)}%" href="${root}seminars/${s.slug}/" data-n="${s.n}" data-label="${pad(s.n)} · ${e(s.place)} — ${e(s.title)}" aria-label="Семинар ${pad(s.n)}. ${e(s.place)}. ${e(s.title)}"><span class="pin-dot"></span><span class="pin-tag" aria-hidden="true">${pad(s.n)}</span></a>`;
+    return `<a class="wpin wpin--${TAG_SIDE[m.n]}${cur}" style="--x:${m.x.toFixed(2)}%;--y:${m.y.toFixed(2)}%;--c:${t.accent}" href="${root}seminars/${s.slug}/" data-title="${e(s.title)}" data-meta="${pad(s.n)} · ${e(s.place)} · ${e(shortFormat.get(s.format) || s.format)}" aria-label="Семинар ${pad(s.n)}. ${e(s.place)}. ${e(s.title)}"><span class="wpin-dot"></span><span class="wpin-tag">${pad(s.n)}</span></a>`;
   }).join("\n      ");
 
-  return `<figure class="plate plate--world">
-  <figcaption class="plate-bar"><span>${current ? `Съёмка ${pad(current)} · ${e(seminars[current - 1].place)}` : "Съёмка 00 · Мир"}</span><span>Проекция Робинсона · сетка 30°</span></figcaption>
-  <div class="world-stage" role="group" aria-label="Карта мира с восемью точками семинаров">
-    <svg class="map-svg" viewBox="0 0 ${WORLD_W} ${WORLD_H.toFixed(2)}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
-      <path class="m-horizon" d="${horizonPath()}"/>
-      <path class="m-grat" d="${worldGraticule()}"/>
+  return `<figure class="world-plate">
+  <div class="world-canvas" role="group" aria-label="Карта мира с восемью кейсами">
+    <svg viewBox="0 0 ${WORLD_W} ${WORLD_H.toFixed(2)}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+      <path class="w-horizon" d="${horizonPath()}"/>
+      <path class="w-grat" d="${worldGraticule()}"/>
       <use href="#world-land" x="0" y="0" width="${WORLD_W}" height="${WORLD_H.toFixed(2)}"/>
     </svg>
     ${pins}
   </div>
-  <p class="plate-readout"><span class="mono" aria-hidden="true">Точка</span><span class="readout-text" id="map-readout">${hint}</span></p>
-  <div class="plate-bar plate-bar--foot"><span>${e(hero.plate_caption)}</span><span>8 точек · 8 семинаров</span></div>
+  <div class="map-panel" aria-hidden="true">
+    <span class="map-panel-n" id="map-n">8</span>
+    <div class="map-panel-text">
+      <strong id="map-title">Восемь кейсов корпуса</strong>
+      <span id="map-meta">${e(hero.plate_caption)}</span>
+    </div>
+  </div>
+  <figcaption class="plate-caption"><span>Проекция Робинсона · Natural Earth 110m</span><span>8 точек · 8 кейсов</span></figcaption>
 </figure>`;
 }
 
-function regionalPlateHTML(s) {
+function regionalFigure(s, opts = {}) {
   const { bbox, fixed } = normalizeBbox(s);
   if (fixed) console.warn(`bbox ${s.slug}: source frame adjusted to contain marker -> ${bbox.join(",")}`);
   const fit = fitFrame(bbox, s.marker);
   const p = regionalPlate(rings, fit.bbox, s.marker);
-  return `<figure class="plate plate--region" style="--ar:${p.ratio.toFixed(4)}">
-  <figcaption class="plate-bar"><span>Кадр ${pad(s.n)} · ${e(s.place)}</span><span>${e(s.coords)}</span></figcaption>
-  <div class="stage" style="aspect-ratio:${p.ratio.toFixed(4)}" role="img" aria-label="Региональная карта. ${e(s.place)}. Рамка ${e(formatBounds(fit.bbox))}.">
-    <svg class="map-svg" viewBox="${p.viewBox}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
-      <path class="m-grat" d="${p.grat}"/>
-      <path class="m-land" d="${p.land}"/>
-      <path class="m-frame" d="${p.frame}"/>
+  const t = theme(s.n);
+
+  let callouts = "";
+  if (s.n === 1) {
+    const [minX, minY, vw, vh] = p.viewBox.split(" ").map(Number);
+    const mx = minX + (p.marker.x / 100) * vw;
+    const my = minY + (p.marker.y / 100) * vh;
+    const actors = [
+      ["Китай", 18, 26],
+      ["США", 62, 20],
+      ["Франция", 24, 74],
+    ];
+    const lines = actors.map(([, x, y]) => {
+      const ax = minX + (x / 100) * vw;
+      const ay = minY + (y / 100) * vh;
+      return `<line x1="${mx.toFixed(1)}" y1="${my.toFixed(1)}" x2="${ax.toFixed(1)}" y2="${ay.toFixed(1)}"/>`;
+    }).join("");
+    const chips = actors.map(([name, x, y]) => `<span class="actor" style=\"left:${x}%;top:${y}%\"><i></i>${name}</span>`).join("");
+    callouts = `<svg class="callout-lines" viewBox="${p.viewBox}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">${lines}</svg>${chips}`;
+  }
+
+  return `<figure class="case-plate" style="--accent:${t.accent};--deep:${t.deep}" >
+  <div class="case-stage" style="aspect-ratio:${p.ratio.toFixed(4)}" role="img" aria-label="Региональная карта. ${e(s.place)}. Рамка ${e(formatBounds(fit.bbox))}.">
+    <svg viewBox="${p.viewBox}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+      <path class="c-grat" d="${p.grat}"/>
+      <path class="c-land" d="${p.land}"/>
+      <path class="c-frame" d="${p.frame}"/>
     </svg>
-    <span class="pin pin--site" style="--x:${p.marker.x.toFixed(3)}%;--y:${p.marker.y.toFixed(3)}%"><span class="pin-dot"></span></span>
+    ${callouts}
+    <span class="site-pin" style="--x:${p.marker.x.toFixed(3)}%;--y:${p.marker.y.toFixed(3)}%"><span></span></span>
   </div>
-  <div class="plate-bar plate-bar--foot"><span>${e(formatBounds(fit.bbox))}</span><span>Робинсон · сетка ${p.lonStep}° / ${p.latStep}°</span></div>
+  <figcaption class="case-caption"><span>${e(s.coords)}</span><span>${e(formatBounds(fit.bbox))}</span></figcaption>
 </figure>`;
 }
 
-// ---------------------------------------------------------------- layout
+function caseCard(s, root) {
+  const t = thumbData.get(s.n);
+  const th = theme(s.n);
+  return `<a class="case" href="${root}seminars/${s.slug}/" data-format="${e(s.format_key)}" style="--accent:${th.accent};--deep:${th.deep};--soft:${th.soft}">
+  <span class="case-media">
+    <svg viewBox="${t.viewBox}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+      <use href="${t.href}" x="${t.x.toFixed(1)}" y="${t.y.toFixed(1)}" width="${t.w.toFixed(1)}" height="${t.h.toFixed(1)}"></use>
+      <circle class="case-pin" cx="${t.cx.toFixed(1)}" cy="${t.cy.toFixed(1)}" r="${(t.r * 1.15).toFixed(1)}"></circle>
+    </svg>
+    <span class="case-num" aria-hidden="true">${pad(s.n)}</span>
+    <span class="case-place">${e(s.place)}</span>
+  </span>
+  <span class="case-body">
+    <span class="case-kicker">${e(s.week)} · ${e(shortFormat.get(s.format) || s.format)}</span>
+    <h3>${e(s.title)}</h3>
+    <span class="case-short">${e(s.short)}</span>
+    <span class="case-open">Открыть кейс <i aria-hidden="true">→</i></span>
+  </span>
+</a>`;
+}
+
+// ---------------------------------------------------------------- shared pieces
 
 const NAV = [
   ["", "Главная", "home"],
+  ["seminars/", "Кейсы", "seminars"],
   ["course/", "Дисциплина", "discipline"],
-  ["seminars/", "Семинары", "seminars"],
   ["method/", "Методика", "methodology"],
   ["artifacts/", "Артефакты", "artifacts"],
   ["reading/", "Литература", "literature"],
 ];
+
+function modeSwitch() {
+  return `<div class="mode" role="group" aria-label="Режим просмотра">
+      <button type="button" data-set-mode="student" aria-pressed="true">Студент</button>
+      <button type="button" data-set-mode="teacher" aria-pressed="false">Преподаватель</button>
+    </div>`;
+}
 
 function header(root, active) {
   const links = NAV.map(([href, label, key]) => {
     const cur = key === active ? ' aria-current="page"' : "";
     return `<a href="${root}${href}"${cur}>${label}</a>`;
   }).join("");
-  return `<header class="masthead">
-  <div class="wrap masthead-in">
+  return `<header class="site-head">
+  <div class="wrap head-in">
     <a class="brand" href="${root}">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <span class="brand-name">${e(meta.title)}</span>
-      <span class="brand-meta">${e(meta.year)}</span>
+      ${mark()}
+      <span class="brand-text"><b>${e(meta.title)}</b><i>курс · ${e(meta.year)}</i></span>
     </a>
     <nav class="nav" aria-label="Основная навигация">${links}</nav>
+    ${modeSwitch()}
   </div>
-</header>`;
+</header>
+<div class="teacher-banner teacher-only"><div class="wrap"><span>Режим преподавателя: открыты ответы, роли в комнате и таймер.</span><button type="button" data-set-mode="student">Выйти</button></div></div>`;
 }
 
 function footer(root) {
   const links = NAV.map(([href, label]) => `<a href="${root}${href}">${label}</a>`).join("");
-  return `<footer class="footer">
-  <div class="wrap footer-in">
-    <div class="footer-brand">
-      <p class="f-title">${e(meta.title)}</p>
-      <p class="f-sub">${e(meta.subtitle)}</p>
+  return `<footer class="site-foot">
+  <div class="wrap foot-grid">
+    <div class="foot-brand">
+      <a class="brand brand--light" href="${root}">${mark("mark mark--light")}<span class="brand-text"><b>${e(meta.title)}</b><i>${e(meta.subtitle)}</i></span></a>
     </div>
-    <nav class="footer-nav" aria-label="Навигация в подвале">${links}</nav>
-    <dl class="footer-meta">
+    <nav class="foot-nav" aria-label="Навигация в подвале">${links}</nav>
+    <dl class="foot-meta">
       <div><dt>Подразделение</dt><dd>${e(meta.institution)}</dd></div>
       <div><dt>Семестр</dt><dd>${e(meta.semester)}</dd></div>
-      <div><dt>Аудитория</dt><dd>${e(meta.audience)}</dd></div>
-      <div><dt>Контактная работа</dt><dd>${e(meta.contact)}</dd></div>
     </dl>
-    <p class="colophon">Карты: Natural Earth 110m, проекция Робинсона. Шрифты: Golos Text, Literata, IBM Plex Mono. Собрано из content.json.</p>
+    <p class="colophon">Карты: Natural Earth 110m, проекция Робинсона. Шрифты: Golos Text, Literata, IBM Plex Mono. Тексты и числа собраны из content.json.</p>
   </div>
 </footer>`;
 }
 
-function layout({ root = "/", active = "", title, description, body, pageClass = "", pagePath = "" }) {
+function layout({ root = "/", active = "", title, description, body, pageClass = "", pagePath = "", accent = PAGE_ACCENT.home }) {
   const canonical = `${SITE}/${pagePath}`;
   return `<!doctype html>
-<html lang="ru">
+<html lang="ru" data-mode="student">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -169,13 +238,13 @@ function layout({ root = "/", active = "", title, description, body, pageClass =
 <meta property="og:title" content="${e(title)}">
 <meta property="og:description" content="${e(description)}">
 <meta property="og:url" content="${canonical}">
-<meta name="theme-color" content="#f2eee3">
+<meta name="theme-color" content="#0C1E2A">
 <link rel="icon" href="${root}favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="${root}assets/fonts.css">
 <link rel="stylesheet" href="${root}assets/styles.css">
 <script>document.documentElement.classList.add("js")</script>
 </head>
-<body${pageClass ? ` class="${pageClass}"` : ""}>
+<body class="${pageClass}" style="--page-accent:${accent}">
 <a class="skip" href="#main">Перейти к содержанию</a>
 ${header(root, active)}
 <main id="main">
@@ -187,195 +256,237 @@ ${footer(root)}
 </html>`;
 }
 
-function pageHead({ plate, label, title, lead, alt = false }) {
-  return `<header class="page-head wrap${alt ? " page-head--alt" : ""}">
-  <p class="kicker mono"><span class="tick" aria-hidden="true"></span>${plate}${label ? ` · ${label}` : ""}</p>
-  <h1>${title}</h1>
-  ${lead ? `<p class="lead measure">${lead}</p>` : ""}
+function pageHead({ plate, label, title, lead }) {
+  return `<header class="page-head">
+  <div class="wrap">
+    <p class="eyebrow"><span class="tick" aria-hidden="true"></span>${plate}${label ? ` · ${label}` : ""}</p>
+    <h1>${title}</h1>
+    ${lead ? `<p class="page-lead">${lead}</p>` : ""}
+  </div>
 </header>`;
 }
 
-function secHead(num, label, title, opts = {}) {
-  return `<div class="sec-head${opts.wide ? " sec-head--wide" : ""}">
-  <p class="mono sec-label"><span class="tick" aria-hidden="true"></span>${num} / ${label}</p>
+function secHead(eyebrow, title, lead = "", light = false) {
+  return `<header class="sec-head${light ? " sec-head--light" : ""}">
+  <p class="eyebrow"><span class="tick" aria-hidden="true"></span>${eyebrow}</p>
   <h2>${title}</h2>
-  ${opts.intro ? `<p class="sec-intro measure">${opts.intro}</p>` : ""}
-</div>`;
+  ${lead ? `<p class="sec-lead">${lead}</p>` : ""}
+</header>`;
 }
 
-// ---------------------------------------------------------------- shared pieces
-
-function seminarCard(s, root) {
-  const t = thumbData.get(s.n);
-  const r = t.r.toFixed(1);
-  return `<a class="card" href="${root}seminars/${s.slug}/" data-format="${e(s.format_key)}">
-  <span class="card-map" aria-hidden="true">
-    <svg viewBox="${t.viewBox}" preserveAspectRatio="xMidYMid meet" focusable="false">
-      <use href="${t.href}" x="${t.x.toFixed(1)}" y="${t.y.toFixed(1)}" width="${t.w.toFixed(1)}" height="${t.h.toFixed(1)}"></use>
-      <circle class="thumb-pin" cx="${t.cx.toFixed(1)}" cy="${t.cy.toFixed(1)}" r="${r}"></circle>
-    </svg>
-  </span>
-  <span class="card-top"><span class="mono">${e(s.week)}</span><span class="mono">${pad(s.n)} / 08</span></span>
-  <h3>${e(s.title)}</h3>
-  <p class="card-short">${e(s.short)}</p>
-  <span class="card-foot"><span class="tag">${e(shortFormat.get(s.format) || s.format)}</span><span class="mono card-place">${e(s.place)}</span></span>
-</a>`;
-}
-
-function assessmentTable() {
-  const rows = assessment.rows.map((r) => `<tr>
-      <td data-label="Компонент"><span class="score-name">${e(r.component)}</span></td>
-      <td data-label="Вес" class="score-weight"><span>${e(r.weight)}</span><i aria-hidden="true" style="--w:${Number(r.weight)}%"></i></td>
-      <td data-label="Что оценивается" class="score-detail">${e(r.detail)}</td>
-    </tr>`).join("\n    ");
-  return `<table class="score">
-  <caption class="sr-only">Оценивание на 100 баллов</caption>
-  <thead><tr><th scope="col">Компонент</th><th scope="col">Вес</th><th scope="col">Что оценивается</th></tr></thead>
-  <tbody>
-    ${rows}
-  </tbody>
-  <tfoot><tr><td>Итого</td><td class="score-weight">100</td><td></td></tr></tfoot>
-</table>`;
-}
-
-function scoreBar() {
-  return `<div class="score-bar" aria-hidden="true">${assessment.rows.map((r) => `<span style="--w:${Number(r.weight)}%" title="${e(r.component)}: ${e(r.weight)}"></span>`).join("")}</div>`;
-}
-
-function qaList(items) {
+function qaList(items, gated = false) {
   return items.map((item, i) => `<details class="qa"${i === 0 ? " open" : ""}>
   <summary><span class="qa-q">${e(item.q)}</span><span class="qa-mark" aria-hidden="true"></span></summary>
-  <div class="qa-a"><p>${e(item.a)}</p></div>
+  <div class="qa-a">
+    ${gated ? `<p class="teacher-only">${e(item.a)}</p><p class="student-only qa-locked">Ответ разбирается на семинаре. В режиме «Преподаватель» он открыт.</p>` : `<p>${e(item.a)}</p>`}
+  </div>
 </details>`).join("\n");
 }
 
-function sourceItem(r, i) {
-  const link = r.link
-    ? `<a class="src-open" href="${e(r.link)}" target="_blank" rel="noopener">Открыть источник <span aria-hidden="true">↗</span></a>`
-    : `<span class="src-lib">в библиотеке</span>`;
-  return `<li class="source">
-  <span class="src-n mono" aria-hidden="true">${pad(i + 1)}</span>
-  <div class="src-body">
-    <h4>${e(r.author)}. ${e(r.title)}</h4>
-    <p class="src-meta mono">${e(r.year)} · ${e(r.note)}</p>
-    <p class="src-ann">${e(r.annotation)}</p>
-    <p class="src-link">${link}</p>
+function accessBadge(r) {
+  return r.link
+    ? `<a class="src-open" href="${e(r.link)}" target="_blank" rel="noopener">Открытый доступ <span aria-hidden="true">↗</span></a>`
+    : `<span class="src-lib">Закрытый доступ · в библиотеке</span>`;
+}
+
+function sourceCard(r, i) {
+  return `<article class="source">
+  <span class="source-n">${pad(i + 1)}</span>
+  <div class="source-cite">
+    <h3>${e(r.author)}</h3>
+    <p class="source-title">${e(r.title)}</p>
+    <p class="source-year">${e(r.year)}</p>
+    <span class="source-access">${accessBadge(r)}</span>
   </div>
-</li>`;
+  <div class="source-body">
+    <p class="source-note">${e(r.note)}</p>
+    <p class="source-ann">${e(r.annotation)}</p>
+  </div>
+</article>`;
 }
 
 function readingBlock(s) {
-  return `<ol class="sources">${s.reading.map(sourceItem).join("")}</ol>`;
+  return `<div class="sources">${s.reading.map(sourceCard).join("")}</div>`;
+}
+
+function bookCover(r, s) {
+  const t = theme(s.n);
+  return `<article class="book" style="--accent:${t.accent};--deep:${t.deep}">
+  <span class="book-top">Семинар ${pad(s.n)}</span>
+  <span class="book-author">${e(r.author)}</span>
+  <span class="book-title">${e(r.title)}</span>
+  <span class="book-foot"><span>${e(r.year)}</span><span>${e(shortFormat.get(s.format) || s.format)}</span></span>
+</article>`;
 }
 
 function pager(s, root) {
   const prev = s.n > 1 ? seminars[s.n - 2] : null;
   const next = s.n < seminars.length ? seminars[s.n] : null;
+  const prevT = prev ? theme(prev.n) : theme(s.n);
+  const nextT = next ? theme(next.n) : theme(s.n);
   const prevHref = prev ? `${root}seminars/${prev.slug}/` : `${root}seminars/`;
   const nextHref = next ? `${root}seminars/${next.slug}/` : `${root}seminars/`;
-  return `<nav class="pager" aria-label="Соседние семинары">
-  <a class="pager-link pager-prev" href="${prevHref}">
-    <span class="mono">${prev ? "Предыдущий" : "К списку"}</span>
-    <b>${prev ? `${pad(prev.n)} · ${e(prev.title)}` : "Все семинары"}</b>
+  return `<nav class="pager" aria-label="Соседние кейсы">
+  <a class="pager-link" style="--accent:${prevT.accent};--deep:${prevT.deep}" href="${prevHref}">
+    <span class="pager-kicker">${prev ? "Предыдущий кейс" : "Все кейсы"}</span>
+    <b>${prev ? `${pad(prev.n)} · ${e(prev.title)}` : "Восемь кейсов"}</b>
+    <span class="pager-arrow" aria-hidden="true">←</span>
   </a>
-  <a class="pager-link pager-next" href="${nextHref}">
-    <span class="mono">${next ? "Следующий" : "К списку"}</span>
-    <b>${next ? `${pad(next.n)} · ${e(next.title)}` : "Все семинары"}</b>
+  <a class="pager-link pager-link--next" style="--accent:${nextT.accent};--deep:${nextT.deep}" href="${nextHref}">
+    <span class="pager-kicker">${next ? "Следующий кейс" : "Все кейсы"}</span>
+    <b>${next ? `${pad(next.n)} · ${e(next.title)}` : "Восемь кейсов"}</b>
+    <span class="pager-arrow" aria-hidden="true">→</span>
   </a>
 </nav>`;
+}
+
+// ---------------------------------------------------------------- format glyphs
+
+const FORMAT_KEYS = ["dispute", "simulation", "jigsaw", "negotiation", "redteam", "court", "sprint", "exhibition"];
+
+function formatGlyph(key) {
+  const paths = {
+    dispute: '<path d="M11 18a13 13 0 0 1 21-4"/><path d="M37 30a13 13 0 0 1-21 4"/><path d="M32 8l1 6-6-1"/><path d="M16 40l-1-6 6 1"/>',
+    simulation: '<circle cx="24" cy="24" r="3"/><circle cx="24" cy="10" r="2.5"/><circle cx="37" cy="18" r="2.5"/><circle cx="33" cy="35" r="2.5"/><circle cx="15" cy="35" r="2.5"/><circle cx="11" cy="18" r="2.5"/><path d="M24 13v8M34 20l-7 3M30 33l-4-6M18 33l3-6M14 20l7 3"/>',
+    jigsaw: '<rect x="8" y="9" width="14" height="14"/><rect x="26" y="9" width="14" height="14"/><rect x="8" y="27" width="14" height="14"/><path d="M26 27h14v14H26"/><path d="M22 16h4M22 34h4M15 23v4M33 23v4"/>',
+    negotiation: '<ellipse cx="24" cy="26" rx="13" ry="7"/><circle cx="24" cy="10" r="3"/><circle cx="10" cy="19" r="3"/><circle cx="38" cy="19" r="3"/><circle cx="15" cy="40" r="3"/><circle cx="33" cy="40" r="3"/><path d="M24 13v6M13 21l5 3M35 21l-5 3M17 37l4-4M31 37l-4-4"/>',
+    redteam: '<path d="M24 6l14 5v11c0 9-6 15-14 20-8-5-14-11-14-20V11z"/><path d="M12 16l8 6M36 16l-8 6"/><path d="M9 12l5 1-1 5M39 12l-5 1 1 5"/>',
+    court: '<path d="M24 6L8 15h32z"/><path d="M8 15v3h32v-3"/><path d="M13 21v14M24 21v14M35 21v14"/><path d="M9 39h30"/>',
+    sprint: '<circle cx="9" cy="24" r="2.5"/><circle cx="22" cy="24" r="2.5"/><circle cx="35" cy="24" r="2.5"/><path d="M12 24h7M25 24h7"/><path d="M30 24l5-8M30 24l5 8"/><path d="M35 10v8h8"/>',
+    exhibition: '<path d="M7 12h14v12H7zM27 12h14v12H27zM17 30h14v11H17z"/><path d="M11 24v3M37 24v3M21 30v-3M27 30v-3M24 41v-4"/>',
+  };
+  return `<svg class="glyph" viewBox="0 0 48 48" aria-hidden="true" focusable="false">${paths[key] || paths.dispute}</svg>`;
+}
+
+// ---------------------------------------------------------------- runner
+
+function parseRange(t) {
+  const m = t.match(/(\d+)\D+(\d+)/);
+  return m ? [Number(m[1]), Number(m[2])] : [0, 0];
+}
+
+function runnerDialog(s) {
+  const stages = s.timeline.map((t) => {
+    const [a, b] = parseRange(t.t);
+    return `<li data-start="${a}" data-end="${b}">
+      <span class="rs-time">${e(t.t)}</span>
+      <span class="rs-label">${e(t.label)}</span>
+      <span class="rs-text">${e(t.text)}</span>
+    </li>`;
+  }).join("");
+  return `<dialog class="runner" id="runner" aria-labelledby="runner-title">
+  <div class="runner-in">
+    <header class="runner-head">
+      <div><p class="eyebrow">Кейс ${pad(s.n)} · ${e(s.week)}</p><h2 id="runner-title">${e(s.title)}</h2></div>
+      <button class="runner-close" type="button" data-runner-close aria-label="Закрыть таймер">×</button>
+    </header>
+    <div class="runner-main">
+      <div class="runner-clockbox">
+        <span class="runner-clock" id="runner-clock">90:00</span>
+        <span class="runner-state" id="runner-state">Готов к старту</span>
+        <div class="runner-bar"><i id="runner-bar"></i></div>
+      </div>
+      <div class="runner-now">
+        <p class="eyebrow">Сейчас</p>
+        <h3 id="runner-now-label">${e(s.timeline[0].label)}</h3>
+        <p id="runner-now-text">${e(s.timeline[0].text)}</p>
+      </div>
+    </div>
+    <ol class="runner-stages" id="runner-stages">${stages}</ol>
+    <footer class="runner-controls">
+      <button type="button" class="btn btn--cream" id="runner-start">Начать</button>
+      <button type="button" class="btn btn--ghost-light" id="runner-prev">Назад</button>
+      <button type="button" class="btn btn--ghost-light" id="runner-next">Дальше</button>
+      <button type="button" class="btn btn--ghost-light" id="runner-reset">Сброс</button>
+    </footer>
+  </div>
+</dialog>`;
 }
 
 // ---------------------------------------------------------------- home
 
 function homePage() {
-  const stats = hero.stats.map((s) => `<div class="stat"><dt class="stat-value">${e(s.value)}</dt><dd class="stat-label">${e(s.label)}</dd></div>`).join("");
+  const cards = seminars.map((s) => caseCard(s, "/")).join("\n    ");
   const nots = aim.nots.map((n) => `<li>${e(n)}</li>`).join("");
-  const principlesHTML = principles.map((p) => `<li class="principle">
-      <span class="p-n mono" aria-hidden="true">${e(p.n)}</span>
+  const pr = principles.map((p) => `<li class="principle">
+      <span class="principle-n">${e(p.n)}</span>
       <h3>${e(p.title)}</h3>
       <p>${e(p.text)}</p>
     </li>`).join("");
-  const cards = seminars.map((s) => seminarCard(s, "/")).join("\n    ");
-  const atlasIndex = seminars.map((s) => `<li><a href="/seminars/${s.slug}/" data-pin="${s.n}" data-label="${pad(s.n)} · ${e(s.place)} — ${e(s.title)}">
-      <span class="ai-n mono">${pad(s.n)}</span>
-      <span class="ai-place">${e(s.place)}</span>
-      <span class="ai-title">${e(s.title)}</span>
-      <span class="ai-arrow" aria-hidden="true">↗</span>
-    </a></li>`).join("");
-  const tacts = methodology.tacts.map((t) => `<li><span class="tact-time mono">${e(t.time)}</span><h3>${e(t.title)}</h3><p>${e(t.text)}</p></li>`).join("");
-  const scoreLegend = assessment.rows.map((r) => `<li><span class="mono">${e(r.weight)}</span>${e(r.component)}</li>`).join("");
-  const tiles = [
-    ["course/", "Дисциплина", "Паспорт, ритм 90 минут, таблица оценивания, правила и вопросы."],
-    ["seminars/", "Семинары", "Восемь страниц: карта, вопрос, таймлайн, артефакт, источники."],
-    ["method/", "Методика", "Три такта, шкала ICAP, восемь форматов и точки отказа."],
-    ["artifacts/", "Артефакты", "Правила, анатомия репозитория и восемь слотов витрины."],
-    ["reading/", "Литература", `${readingCount} источника с аннотациями, по три на семинар.`],
-  ].map(([href, title, text], i) => `<a class="tile" href="/${href}"><span class="tile-n mono">${pad(i + 1)}</span><h3>${title}</h3><p>${text}</p><span class="tile-arrow" aria-hidden="true">↗</span></a>`).join("");
+  const tacts = methodology.tacts.map((t) => `<li><span class="tact-time">${e(t.time)}</span><h3>${e(t.title)}</h3><p>${e(t.text)}</p></li>`).join("");
+  const covers = seminars.slice(0, 3).map((s) => bookCover(s.reading[0], s)).join("");
+  const legend = assessment.rows.map((r) => `<li><span>${e(r.weight)}</span>${e(r.component)}</li>`).join("");
 
   const body = `${mapSprite()}
-<section class="hero wrap">
-  <div class="hero-head">
-    <p class="kicker mono"><span class="tick" aria-hidden="true"></span>${e(meta.kicker)}</p>
+<section class="home-hero">
+  <div class="wrap hero-inner">
+    <p class="eyebrow eyebrow--warm"><span class="tick" aria-hidden="true"></span>Дисциплина · восемь кейсов</p>
     <h1>${e(meta.title)}</h1>
-    <p class="hero-sub">${e(meta.subtitle)}</p>
-  </div>
-  <div class="hero-body">
-    <div class="hero-copy">
-      <p class="lead">${e(hero.lead)}</p>
+    <div class="hero-cols">
+      <p class="hero-lead">${e(hero.lead)}</p>
       <p class="hero-thesis">${e(hero.thesis)}</p>
-      <div class="actions">
-        <a class="btn" href="/seminars/">Восемь семинаров</a>
-        <a class="btn btn--ghost" href="/course/">Паспорт дисциплины</a>
+    </div>
+    <div class="actions">
+      <a class="btn btn--cream" href="/seminars/">Смотреть кейсы</a>
+      <a class="btn btn--ghost-light" href="/course/">Паспорт дисциплины</a>
+    </div>
+  </div>
+  <div class="wrap hero-map">${worldStage("/")}</div>
+</section>
+
+<section class="band" id="cases">
+  <div class="wrap">
+    ${secHead("01 · Программа", "Восемь кейсов", "Каждый кейс держит один механизм, один формат работы и один артефакт в GitHub.")}
+    <div class="case-grid" id="seminar-grid">${cards}</div>
+  </div>
+</section>
+
+<section class="band band--tint" id="aim">
+  <div class="wrap aim">
+    <div class="aim-main">
+      <p class="eyebrow">02 · ${e(aim.label)}</p>
+      <h2>${e(aim.title)}</h2>
+      <div class="prose">${aim.body.map((p) => `<p>${e(p)}</p>`).join("")}</div>
+    </div>
+    <aside class="nots">
+      <h3>Чего здесь нет</h3>
+      <ul>${nots}</ul>
+    </aside>
+  </div>
+</section>
+
+<section class="band band--ink" id="principles">
+  <div class="wrap">
+    ${secHead("03 · Принципы", "Три принципа", "", true)}
+    <ol class="principles">${pr}</ol>
+  </div>
+</section>
+
+<section class="band" id="method">
+  <div class="wrap">
+    ${secHead("04 · Как устроены 90 минут", "Вход, работа, фиксация", "Середина меняется от кейса к кейсу. Ритм остаётся.")}
+    <ol class="tact-grid">${tacts}</ol>
+    <div class="assess-teaser">
+      <div>
+        <p class="eyebrow">Оценивание</p>
+        <p class="assess-total">100 <span>баллов</span></p>
+        <p class="assess-copy">${e(assessment.intro)}</p>
+        <a class="link-arrow" href="/course/#assessment">Таблица оценивания <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="assess-viz">
+        <div class="weight-bar" aria-hidden="true">${assessment.rows.map((r) => `<span style="--w:${Number(r.weight)}%"></span>`).join("")}</div>
+        <ul class="weight-legend">${legend}</ul>
       </div>
     </div>
-    <dl class="stats">${stats}</dl>
   </div>
 </section>
 
-<section class="atlas wrap" aria-labelledby="atlas-title">
-  <h2 class="sr-only" id="atlas-title">Карта восьми семинаров</h2>
-  ${worldPlate("/", 0, true)}
-  <ol class="atlas-index">${atlasIndex}</ol>
-</section>
-
-<section class="section wrap" id="aim">
-  ${secHead("01", e(aim.label), e(aim.title))}
-  <div class="aim-grid">
-    <div class="aim-copy">${aim.body.map((p) => `<p>${e(p)}</p>`).join("")}</div>
-    <ul class="nots">${nots}</ul>
+<section class="band band--tint" id="reading">
+  <div class="wrap">
+    ${secHead("05 · Литература", "Что читать", `${readingCount} источника с аннотациями: три на каждый кейс.`)}
+    <div class="book-row">${covers}</div>
+    <a class="link-arrow" href="/reading/">Вся литература по кейсам <span aria-hidden="true">→</span></a>
   </div>
-</section>
-
-<section class="section wrap" id="principles">
-  ${secHead("02", "Принципы", "Три принципа")}
-  <ol class="principles">${principlesHTML}</ol>
-</section>
-
-<section class="section wrap" id="program">
-  ${secHead("03", "Программа", "Восемь семинаров")}
-  <div class="seminar-grid" id="seminar-grid">${cards}</div>
-  <p class="more"><a class="text-link" href="/seminars/">Все семинары с фильтром по формату <span aria-hidden="true">→</span></a></p>
-</section>
-
-<section class="section wrap" id="method">
-  ${secHead("04", "Методика и оценивание", "Как устроены 90 минут")}
-  <ol class="tacts">${tacts}</ol>
-  <div class="score-teaser">
-    <div class="score-teaser-copy">
-      <p class="mono">${assessment.rows.reduce((n, r) => n + Number(r.weight), 0)} баллов</p>
-      <p>${e(assessment.intro)}</p>
-      <a class="text-link" href="/course/#assessment">Таблица оценивания и правила <span aria-hidden="true">→</span></a>
-    </div>
-    <div class="score-teaser-viz">
-      ${scoreBar()}
-      <ul class="score-legend">${scoreLegend}</ul>
-    </div>
-  </div>
-</section>
-
-<section class="section wrap" id="explore">
-  ${secHead("05", "Разделы", "Что ещё на сайте")}
-  <div class="tiles">${tiles}</div>
 </section>`;
 
   return layout({
@@ -385,6 +496,205 @@ function homePage() {
     body,
     pageClass: "page-home",
     pagePath: "",
+    accent: PAGE_ACCENT.home,
+  });
+}
+
+// ---------------------------------------------------------------- seminars index
+
+function seminarsPage() {
+  const seen = new Set();
+  const chips = seminars.filter((s) => {
+    if (seen.has(s.format_key)) return false;
+    seen.add(s.format_key);
+    return true;
+  }).map((s) => {
+    const label = shortFormat.get(s.format) || s.format;
+    const count = seminars.filter((x) => x.format_key === s.format_key).length;
+    return `<button class="chip" type="button" data-filter="${e(s.format_key)}" aria-pressed="false">${e(label)} <span>${count}</span></button>`;
+  }).join("");
+  const cards = seminars.map((s) => caseCard(s, "/")).join("\n    ");
+
+  const body = `${pageHead({ plate: "Программа", label: "8 кейсов", title: "Кейсы", lead: e(hero.thesis) })}
+<section class="band">
+  <div class="wrap">
+    <div class="filter js-only" role="group" aria-label="Фильтр по формату работы">
+      <button class="chip is-on" type="button" data-filter="all" aria-pressed="true">Все <span>8</span></button>
+      ${chips}
+    </div>
+    <p class="filter-status js-only">Показаны все 8 кейсов</p>
+    <div class="case-grid" id="seminar-grid">${cards}</div>
+    <p class="filter-empty js-only" hidden>В этом формате пока нет кейсов.</p>
+  </div>
+</section>`;
+
+  return layout({
+    title: `Кейсы · ${meta.title}`,
+    description: `Восемь кейсов дисциплины «${meta.title}»: форматы, карты, артефакты и литература.`,
+    active: "seminars",
+    body,
+    pagePath: "seminars/",
+    accent: PAGE_ACCENT.seminars,
+  });
+}
+
+// ---------------------------------------------------------------- seminar page
+
+function seminarPage(s) {
+  const t = theme(s.n);
+  const outcomes = s.outcomes.map((o) => `<li>${e(o)}</li>`).join("");
+  const timeline = s.timeline.map((item) => {
+    const [a, b] = parseRange(item.t);
+    return `<li data-start="${a}" data-end="${b}">
+      <span class="t-time">${e(item.t)}</span>
+      <div class="t-body"><h3>${e(item.label)}</h3><p>${e(item.text)}</p></div>
+    </li>`;
+  }).join("");
+  const segs = s.timeline.map((item) => {
+    const [a, b] = parseRange(item.t);
+    const w = Math.max(0, b - a);
+    return `<span style="--w:${(w / 90) * 100}%;--o:${(a / 90) * 100}%" title="${e(item.t)} · ${e(item.label)}"></span>`;
+  }).join("");
+
+  const tree = s.artifact.tree.map((line) => {
+    const m = line.match(/^([^—]+)—\s*(.*)$/);
+    const file = m ? m[1].trim() : line;
+    const desc = m ? m[2] : "";
+    return `<li><span class="file">${e(file)}</span>${desc ? `<span class="desc">${e(desc)}</span>` : ""}</li>`;
+  }).join("");
+  const criteria = s.artifact.criteria.map((c) => `<li>${e(c)}</li>`).join("");
+  const before = s.before.map((b) => `<li>${e(b)}</li>`).join("");
+  const checks = qaList(s.check, true);
+  const isCorpus = s.n === seminars.length;
+
+  const body = `${isCorpus ? mapSprite() : ""}
+<header class="case-hero" style="--accent:${t.accent};--deep:${t.deep};--soft:${t.soft}">
+  <div class="wrap case-hero-grid">
+    <div class="case-hero-copy">
+      <p class="eyebrow eyebrow--light"><span class="tick" aria-hidden="true"></span>Кейс ${pad(s.n)} · ${e(s.week)}</p>
+      <h1>${e(s.title)}</h1>
+      <p class="case-lead">${e(s.short)}</p>
+      <div class="case-actions">
+        <button class="btn btn--cream teacher-only" type="button" data-runner>Провести 90 минут</button>
+        <a class="btn btn--ghost-light" href="#reading">Источники</a>
+      </div>
+    </div>
+    <div class="case-hero-map">${isCorpus ? worldStage("/", s.n) : regionalFigure(s)}</div>
+  </div>
+  <div class="wrap case-facts">
+    <div><span>Место</span><b>${e(s.place)}</b></div>
+    <div><span>${isCorpus ? "Схема" : "Координаты"}</span><b>${e(s.coords)}</b></div>
+    <div><span>Формат</span><b>${e(s.format)}</b></div>
+    <div><span>Механизм</span><b>${e(s.mechanism)}</b></div>
+  </div>
+</header>
+
+<nav class="case-subnav" aria-label="Разделы кейса">
+  <div class="wrap">
+    <a href="#question">Вопрос</a>
+    <a href="#timeline">90 минут</a>
+    <a href="#artifact">Артефакт</a>
+    <a href="#check">Проверка</a>
+    <a href="#reading">Источники</a>
+    <button class="teacher-only" type="button" data-runner>Таймер</button>
+  </div>
+</nav>
+
+<section class="band band--paper" id="question">
+  <div class="wrap case-q">
+    <div class="case-q-main">
+      <p class="eyebrow">01 · Вопрос</p>
+      <h2>${e(s.question)}</h2>
+    </div>
+    <div class="outcomes">
+      <p class="eyebrow">Что закрепляем</p>
+      <ol>${outcomes}</ol>
+    </div>
+  </div>
+</section>
+
+<section class="band band--soft teacher-only" style="--soft:${t.soft}">
+  <div class="wrap teacher-grid">
+    <div>
+      <p class="eyebrow">Для преподавателя</p>
+      <h2>Как это работает</h2>
+      <div class="prose"><p>${e(s.why)}</p></div>
+      <p class="format-note">${e(s.format_note)}</p>
+      <button class="btn btn--ink" type="button" data-runner>Запустить таймер</button>
+      <p class="teacher-hint">Таймер идёт по этапам: «Дальше» переводит к следующему, «Назад» возвращает, пробел ставит паузу.</p>
+    </div>
+    <aside class="roles">
+      <p class="eyebrow">Роли в комнате</p>
+      <p>${e(s.roles)}</p>
+    </aside>
+  </div>
+</section>
+
+<section class="band" id="timeline">
+  <div class="wrap">
+    ${secHead("02 · 90 минут", "Таймлайн", "Семь-восемь шагов, каждый со своей задачей.")}
+    <div class="ruler" aria-hidden="true">${segs}</div>
+    <p class="ruler-scale" aria-hidden="true"><span>0</span><span>30</span><span>60</span><span>90</span></p>
+    <ol class="timeline">${timeline}</ol>
+  </div>
+</section>
+
+<section class="band band--ink" id="artifact">
+  <div class="wrap">
+    <p class="eyebrow eyebrow--warm">03 · Артефакт</p>
+    <h2 class="artifact-name">${e(s.artifact.name)}</h2>
+    <div class="artifact-top">
+      <code>${e(s.artifact.repo)}</code>
+      <span>${e(s.artifact.deadline)}</span>
+    </div>
+    <p class="artifact-brief">${e(s.artifact.brief)}</p>
+    <div class="artifact-cols">
+      <div><p class="eyebrow">Дерево файлов</p><ul class="tree">${tree}</ul></div>
+      <div><p class="eyebrow">Критерии</p><ul class="criteria">${criteria}</ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="band band--paper" id="around">
+  <div class="wrap around">
+    <div>
+      <p class="eyebrow">04 · До семинара</p>
+      <ol class="numbered">${before}</ol>
+    </div>
+    <div>
+      <p class="eyebrow">После семинара</p>
+      <p class="after">${e(s.after)}</p>
+    </div>
+  </div>
+</section>
+
+<section class="band band--tint" id="check">
+  <div class="wrap">
+    ${secHead("05 · Проверь себя", "Вопросы к кейсу", "Откройте вопрос и сформулируйте ответ до того, как читать разбор.")}
+    <div class="qa-list">${checks}</div>
+    <p class="student-only mode-note">Ответы открыты в режиме «Преподаватель».</p>
+  </div>
+</section>
+
+<section class="band" id="reading">
+  <div class="wrap">
+    ${secHead("06 · Источники", "Три источника", "К каждому кейсу: справочник, аналитика и пример жанра.")}
+    ${readingBlock(s)}
+    <a class="link-arrow" href="/reading/">Вся литература курса <span aria-hidden="true">→</span></a>
+  </div>
+</section>
+
+<div class="wrap">${pager(s, "/")}</div>
+${runnerDialog(s)}`;
+
+  return layout({
+    title: `${pad(s.n)}. ${s.title} · ${meta.title}`,
+    description: `${s.title}. ${s.short} Кейс ${s.n} из 8, ${s.place}.`,
+    active: "seminars",
+    body,
+    pageClass: "page-case",
+    pagePath: `seminars/${s.slug}/`,
+    accent: t.accent,
   });
 }
 
@@ -401,49 +711,65 @@ function disciplinePage() {
     ["Подразделение", meta.institution],
     ["Язык", meta.lang],
     ["Год", meta.year],
-  ].map(([k, v], i) => `<div class="pass-row${i === 0 ? " pass-row--lead" : ""}"><dt>${e(k)}</dt><dd>${e(v)}</dd></div>`).join("");
+  ].map(([k, v]) => `<div class="pass-row"><dt>${e(k)}</dt><dd>${e(v)}</dd></div>`).join("");
 
-  const tacts = methodology.tacts.map((t, i) => `<li class="tact">
-      <span class="tact-n mono" aria-hidden="true">${pad(i + 1)}</span>
-      <div><span class="tact-time mono">${e(t.time)}</span><h3>${e(t.title)}</h3><p>${e(t.text)}</p></div>
-    </li>`).join("");
-
+  const tacts = methodology.tacts.map((t) => `<li><span class="tact-time">${e(t.time)}</span><h3>${e(t.title)}</h3><p>${e(t.text)}</p></li>`).join("");
   const policy = assessment.policy.map((p) => `<li>${e(p)}</li>`).join("");
+  const rows = assessment.rows.map((r) => `<tr>
+    <td>${e(r.component)}</td>
+    <td class="score-weight"><b>${e(r.weight)}</b><i style="--w:${Number(r.weight)}%"></i></td>
+    <td>${e(r.detail)}</td>
+  </tr>`).join("");
 
-  const body = `${pageHead({ plate: "Плата 01", title: "Дисциплина", lead: e(meta.subtitle) })}
-
-<section class="section wrap" id="passport">
-  ${secHead("01", "Паспорт", "Паспорт дисциплины")}
-  <dl class="passport">${pass}</dl>
+  const body = `${pageHead({ plate: e(meta.kicker), label: meta.year, title: "Паспорт курса", lead: e(meta.subtitle) })}
+<section class="band band--paper" id="passport">
+  <div class="wrap">
+    ${secHead("01 · Паспорт", "Что это за курс")}
+    <dl class="passport">${pass}</dl>
+  </div>
 </section>
 
-<section class="section wrap" id="does">
-  ${secHead("02", "Границы", "Что курс делает и чего не делает")}
-  <div class="does-grid">
-    <div>${aim.body.map((p) => `<p>${e(p)}</p>`).join("")}</div>
+<section class="band band--tint" id="does">
+  <div class="wrap split">
+    <div>
+      ${secHead("02 · Границы", "Что курс делает и чего не делает")}
+      <div class="prose">${aim.body.map((p) => `<p>${e(p)}</p>`).join("")}</div>
+    </div>
     <ul class="nots">${aim.nots.map((n) => `<li>${e(n)}</li>`).join("")}</ul>
   </div>
 </section>
 
-<section class="section wrap" id="rhythm">
-  ${secHead("03", "Ритм", "90 минут, три такта")}
-  <ol class="tact-list">${tacts}</ol>
+<section class="band" id="rhythm">
+  <div class="wrap">
+    ${secHead("03 · Ритм", "90 минут, три такта")}
+    <ol class="tact-grid">${tacts}</ol>
+  </div>
 </section>
 
-<section class="section wrap" id="assessment">
-  ${secHead("04", "Оценивание", "100 баллов")}
-  <p class="sec-intro">${e(assessment.intro)}</p>
-  ${assessmentTable()}
+<section class="band band--tint" id="assessment">
+  <div class="wrap">
+    ${secHead("04 · Оценивание", "100 баллов", e(assessment.intro))}
+    <table class="score">
+      <caption class="sr-only">Оценивание на 100 баллов</caption>
+      <thead><tr><th scope="col">Компонент</th><th scope="col">Вес</th><th scope="col">Что оценивается</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr><td>Итого</td><td class="score-weight"><b>100</b></td><td></td></tr></tfoot>
+    </table>
+  </div>
 </section>
 
-<section class="section wrap" id="rules">
-  ${secHead("05", "Правила", "Три правила оценивания")}
-  <ol class="rules">${policy}</ol>
+<section class="band" id="rules">
+  <div class="wrap">
+    ${secHead("05 · Правила", "Три правила оценивания")}
+    <ol class="rule-list">${policy}</ol>
+  </div>
 </section>
 
-<section class="section wrap" id="faq">
-  ${secHead("06", "Вопросы", "Частые вопросы")}
-  <div class="qa-list">${qaList(faq)}</div>
+<section class="band band--tint" id="faq">
+  <div class="wrap">
+    ${secHead("06 · Вопросы", "Частые вопросы")}
+    <div class="qa-list">${qaList(faq)}</div>
+  </div>
 </section>`;
 
   return layout({
@@ -452,214 +778,24 @@ function disciplinePage() {
     active: "discipline",
     body,
     pagePath: "course/",
-  });
-}
-
-// ---------------------------------------------------------------- seminars index
-
-function seminarsPage() {
-  const seen = new Set();
-  const chips = seminars.filter((s) => {
-    if (seen.has(s.format_key)) return false;
-    seen.add(s.format_key);
-    return true;
-  }).map((s) => {
-    const label = shortFormat.get(s.format) || s.format;
-    const count = seminars.filter((x) => x.format_key === s.format_key).length;
-    return `<button class="chip" type="button" data-filter="${e(s.format_key)}" aria-pressed="false">${e(label)} <span class="chip-count">${count}</span></button>`;
-  }).join("");
-  const cards = seminars.map((s) => seminarCard(s, "/")).join("\n    ");
-
-  const body = `${pageHead({ plate: "Плата 02", title: "Семинары", lead: e(hero.thesis) })}
-${mapSprite()}
-<section class="section wrap" id="list">
-  ${secHead("01", "Список", "Восемь семинаров")}
-  <div class="filter js-only" role="group" aria-label="Фильтр по формату работы">
-    <button class="chip chip--all is-on" type="button" data-filter="all" aria-pressed="true">Все <span class="chip-count">8</span></button>
-    ${chips}
-  </div>
-  <p class="filter-status js-only mono" aria-live="polite">Показаны все 8 семинаров</p>
-  <div class="seminar-grid" id="seminar-grid">${cards}</div>
-  <p class="filter-empty js-only" hidden>В этом формате пока нет семинаров.</p>
-</section>
-
-<section class="section wrap" id="how">
-  ${secHead("02", "Как читать", "Что на странице семинара")}
-  <ol class="plain-list">
-    <li><b>Кадр.</b> Региональная карта в той же проекции, что и карта мира: рамка, координаты, точка съёмки.</li>
-    <li><b>Вопрос.</b> Один вопрос, на который семинар отвечает, и три пункта, которые закрепляются.</li>
-    <li><b>90 минут.</b> Таймлайн по минутам, роли в комнате и объяснение, почему формат выбран именно такой.</li>
-    <li><b>Артефакт.</b> Репозиторий, дерево файлов, критерии и дедлайн. Плюс что сделать до и после.</li>
-    <li><b>Проверка.</b> Вопросы с раскрывающимися ответами и три источника с аннотациями.</li>
-  </ol>
-</section>`;
-
-  return layout({
-    title: `Семинары · ${meta.title}`,
-    description: `Восемь семинаров дисциплины «${meta.title}»: форматы, карты, артефакты и литература.`,
-    active: "seminars",
-    body,
-    pagePath: "seminars/",
-  });
-}
-
-// ---------------------------------------------------------------- seminar page
-
-function seminarPage(s) {
-  const outcomes = s.outcomes.map((o, i) => `<li><span class="mono o-n" aria-hidden="true">${pad(i + 1)}</span><p>${e(o)}</p></li>`).join("");
-  const timeline = s.timeline.map((t) => `<li>
-      <span class="t-time mono">${e(t.t)}</span>
-      <div class="t-body"><h4>${e(t.label)}</h4><p>${e(t.text)}</p></div>
-    </li>`).join("");
-  const segs = s.timeline.map((t) => {
-    const m = t.t.match(/(\d+)\D+(\d+)/);
-    const a = m ? Number(m[1]) : 0;
-    const b = m ? Number(m[2]) : 0;
-    const w = Math.max(0, b - a);
-    return `<span style="--w:${(w / 90) * 100}%;--o:${(a / 90) * 100}%" title="${e(t.t)} · ${e(t.label)}"></span>`;
-  }).join("");
-
-  const tree = s.artifact.tree.map((line) => {
-    const m = line.match(/^([^—]+)—\s*(.*)$/);
-    const file = m ? m[1].trim() : line;
-    const desc = m ? m[2] : "";
-    return `<li><span class="file">${e(file)}</span>${desc ? `<span class="desc">${e(desc)}</span>` : ""}</li>`;
-  }).join("");
-  const criteria = s.artifact.criteria.map((c) => `<li>${e(c)}</li>`).join("");
-  const before = s.before.map((b) => `<li>${e(b)}</li>`).join("");
-  const checks = qaList(s.check);
-
-  const isCorpus = s.n === seminars.length;
-  const plate = isCorpus ? mapSprite() + worldPlate("/", s.n) : regionalPlateHTML(s);
-
-  const body = `<header class="page-head page-head--seminar wrap">
-  <p class="kicker mono"><span class="tick" aria-hidden="true"></span>Кадр ${pad(s.n)} / 08 · ${e(s.week)} · ${e(s.format)}</p>
-  <h1>${e(s.title)}</h1>
-  <p class="lead measure">${e(s.short)}</p>
-</header>
-
-<section class="wrap seminar-atlas${isCorpus ? " is-corpus" : ""}">
-  ${plate}
-  <dl class="data-strip">
-    <div><dt>Место</dt><dd>${e(s.place)}</dd></div>
-    <div><dt>${isCorpus ? "Схема" : "Координаты"}</dt><dd>${e(s.coords)}</dd></div>
-    <div><dt>Формат</dt><dd>${e(s.format)}</dd></div>
-    <div><dt>Механизм</dt><dd>${e(s.mechanism)}</dd></div>
-  </dl>
-</section>
-
-<section class="section wrap" id="question">
-  ${secHead("01", "Вопрос", "Вопрос семинара")}
-  <blockquote class="big-question"><p>${e(s.question)}</p></blockquote>
-</section>
-
-<section class="section wrap" id="outcomes">
-  ${secHead("02", "Закрепляем", "Что закрепляем")}
-  <ol class="outcomes">${outcomes}</ol>
-  <div class="why">
-    <p class="mono">Почему такой формат</p>
-    <p>${e(s.why)}</p>
-    <p class="mono why-note">${e(s.format_note)}</p>
-  </div>
-</section>
-
-<section class="section wrap" id="timeline">
-  ${secHead("03", "90 минут", "Таймлайн")}
-  <div class="ruler" aria-hidden="true">${segs}</div>
-  <p class="ruler-scale mono" aria-hidden="true"><span>0</span><span>30</span><span>60</span><span>90</span></p>
-  <ol class="timeline">${timeline}</ol>
-</section>
-
-<section class="section wrap" id="roles">
-  ${secHead("04", "Комната", "Роли в комнате")}
-  <div class="roles">
-    <p class="mono">30 студентов</p>
-    <p>${e(s.roles)}</p>
-  </div>
-</section>
-
-<section class="section wrap" id="artifact">
-  ${secHead("05", "Артефакт", e(s.artifact.name))}
-  <div class="artifact">
-    <div class="artifact-head">
-      <div>
-        <p class="mono">Репозиторий</p>
-        <p class="repo">${e(s.artifact.repo)}</p>
-      </div>
-      <div class="artifact-deadline">
-        <p class="mono">Дедлайн</p>
-        <p>${e(s.artifact.deadline)}</p>
-      </div>
-    </div>
-    <p class="artifact-brief">${e(s.artifact.brief)}</p>
-    <div class="artifact-cols">
-      <div>
-        <p class="mono">Дерево файлов</p>
-        <ul class="tree">${tree}</ul>
-      </div>
-      <div>
-        <p class="mono">Критерии</p>
-        <ul class="criteria">${criteria}</ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section wrap" id="around">
-  ${secHead("06", "До и после", "До семинара и после")}
-  <div class="around">
-    <div class="around-col">
-      <p class="mono">До семинара</p>
-      <ol class="numbered">${before}</ol>
-    </div>
-    <div class="around-col">
-      <p class="mono">После семинара</p>
-      <p class="after-text">${e(s.after)}</p>
-    </div>
-  </div>
-</section>
-
-<section class="section wrap" id="check">
-  ${secHead("07", "Проверь себя", "Вопросы к семинару")}
-  <div class="qa-list">${checks}</div>
-</section>
-
-<section class="section wrap" id="reading">
-  ${secHead("08", "Источники", "Три источника")}
-  ${readingBlock(s)}
-</section>
-
-<div class="wrap">${pager(s, "/")}</div>`;
-
-  return layout({
-    title: `${pad(s.n)}. ${s.title} · ${meta.title}`,
-    description: `${s.title}. ${s.short} Семинар ${s.n} из 8, ${s.place}.`,
-    active: "seminars",
-    body,
-    pageClass: "page-seminar",
-    pagePath: `seminars/${s.slug}/`,
+    accent: PAGE_ACCENT.discipline,
   });
 }
 
 // ---------------------------------------------------------------- methodology
 
 function methodologyPage() {
-  const tacts = methodology.tacts.map((t, i) => `<li class="tact">
-      <span class="tact-n mono" aria-hidden="true">${pad(i + 1)}</span>
-      <div><span class="tact-time mono">${e(t.time)}</span><h3>${e(t.title)}</h3><p>${e(t.text)}</p></div>
-    </li>`).join("");
+  const tacts = methodology.tacts.map((t) => `<li><span class="tact-time">${e(t.time)}</span><h3>${e(t.title)}</h3><p>${e(t.text)}</p></li>`).join("");
   const levels = methodology.icap.levels.map((l) => `<li class="icap-level">
-      <span class="icap-key" aria-hidden="true">${e(l.key)}</span>
-      <h3>${e(l.name)}</h3>
-      <p>${e(l.text)}</p>
-      <span class="icap-share mono">${e(l.share)}</span>
+      <span class="icap-key">${e(l.key)}</span>
+      <div><h3>${e(l.name)}</h3><p>${e(l.text)}</p><span class="icap-share">${e(l.share)}</span></div>
     </li>`).join("");
   const formats = methodology.formats.map((f, i) => `<li class="format">
-      <span class="format-n mono" aria-hidden="true">${pad(i + 1)}</span>
+      <span class="format-glyph">${formatGlyph(FORMAT_KEYS[i])}</span>
       <div class="format-body">
-        <div class="format-head"><h3>${e(f.name)}</h3><span class="tag">${e(f.short)}</span></div>
+        <div class="format-head"><span class="format-n">${pad(i + 1)}</span><h3>${e(f.name)}</h3><span class="tag">${e(f.short)}</span></div>
         <p>${e(f.text)}</p>
-        <p class="format-where mono">${e(f.where)}</p>
+        <span class="format-where">${e(f.where)}</span>
       </div>
     </li>`).join("");
   const neighbors = methodology.neighbors.items.map((n) => {
@@ -667,38 +803,47 @@ function methodologyPage() {
       ? `<a href="${e(n.link)}" target="_blank" rel="noopener">${e(n.name)} <span aria-hidden="true">↗</span></a>`
       : `<span>${e(n.name)}</span>`;
     return `<li class="neighbor">
-      <div class="neighbor-head"><h3>${name}</h3><span class="mono">${e(n.org)}</span></div>
-      <p><span class="mono">Берём.</span> ${e(n.take)}</p>
-      <p><span class="mono">Чего нет.</span> ${e(n.gap)}</p>
+      <div class="neighbor-head"><h3>${name}</h3><span>${e(n.org)}</span></div>
+      <p><b>Берём.</b> ${e(n.take)}</p>
+      <p><b>Чего нет.</b> ${e(n.gap)}</p>
     </li>`;
   }).join("");
 
-  const body = `${pageHead({ plate: "Плата 03", title: "Методика", lead: e(methodology.lead) })}
-
-<section class="section wrap" id="tacts">
-  ${secHead("01", "Такты", "Вход, работа, фиксация")}
-  <ol class="tact-list">${tacts}</ol>
+  const body = `${pageHead({ plate: "Методика", label: "90 минут", title: "Как устроен семинар", lead: e(methodology.lead) })}
+<section class="band band--paper" id="tacts">
+  <div class="wrap">
+    ${secHead("01 · Такты", "Вход, работа, фиксация")}
+    <ol class="tact-grid">${tacts}</ol>
+  </div>
 </section>
 
-<section class="section wrap" id="icap">
-  ${secHead("02", "Шкала", e(methodology.icap.title))}
-  <p class="sec-intro">${e(methodology.icap.text)}</p>
-  <ol class="icap-grid">${levels}</ol>
+<section class="band band--tint" id="icap">
+  <div class="wrap">
+    ${secHead("02 · Шкала", e(methodology.icap.title), e(methodology.icap.text))}
+    <ol class="icap-grid">${levels}</ol>
+  </div>
 </section>
 
-<section class="section wrap" id="formats">
-  ${secHead("03", "Форматы", "Восемь форматов и где они ломаются")}
-  <ol class="formats">${formats}</ol>
+<section class="band" id="formats">
+  <div class="wrap">
+    ${secHead("03 · Форматы", "Восемь форматов и где они ломаются")}
+    <ol class="formats">${formats}</ol>
+  </div>
 </section>
 
-<section class="section wrap" id="thirty">
-  ${secHead("04", "30 человек", "Правила для тридцати")}
-  <div class="group-note"><p class="mono">Одна комната, один преподаватель</p><p>${e(methodology.group_note)}</p></div>
+<section class="band band--ink" id="thirty">
+  <div class="wrap group-note">
+    <p class="eyebrow eyebrow--warm">04 · 30 человек</p>
+    <h2>Одна комната, один преподаватель</h2>
+    <p>${e(methodology.group_note)}</p>
+  </div>
 </section>
 
-<section class="section wrap" id="neighbors">
-  ${secHead("05", "Контекст", e(methodology.neighbors.title), { intro: e(methodology.neighbors.intro) })}
-  <ol class="neighbors">${neighbors}</ol>
+<section class="band band--tint" id="neighbors">
+  <div class="wrap">
+    ${secHead("05 · Контекст", e(methodology.neighbors.title), e(methodology.neighbors.intro))}
+    <ol class="neighbors">${neighbors}</ol>
+  </div>
 </section>`;
 
   return layout({
@@ -707,54 +852,57 @@ function methodologyPage() {
     active: "methodology",
     body,
     pagePath: "method/",
+    accent: PAGE_ACCENT.methodology,
   });
 }
 
 // ---------------------------------------------------------------- artifacts
 
 function artifactsPage() {
-  const rules = artifacts_page.rules.map((r, i) => `<li><span class="mono" aria-hidden="true">${pad(i + 1)}</span><p>${e(r)}</p></li>`).join("");
+  const rules = artifacts_page.rules.map((r, i) => `<li><span>${pad(i + 1)}</span><p>${e(r)}</p></li>`).join("");
   const anatomy = artifacts_page.anatomy.map((line) => {
     const m = line.match(/^([^—]+)—\s*(.*)$/);
-    const file = m ? m[1].trim() : line;
-    const desc = m ? m[2] : "";
-    return `<li><span class="file">${e(file)}</span>${desc ? `<span class="desc">${e(desc)}</span>` : ""}</li>`;
+    return `<li><span class="file">${e(m ? m[1].trim() : line)}</span>${m ? `<span class="desc">${e(m[2])}</span>` : ""}</li>`;
   }).join("");
-  const submit = artifacts_page.submit.map((s, i) => `<li><span class="mono" aria-hidden="true">${pad(i + 1)}</span><p>${e(s)}</p></li>`).join("");
-  const slots = seminars.map((s) => `<a class="slot" href="/seminars/${s.slug}/">
-      <span class="slot-top mono"><span>Слот ${pad(s.n)}</span><span>${e(s.artifact.repo)}</span></span>
+  const submit = artifacts_page.submit.map((r, i) => `<li><span>${pad(i + 1)}</span><p>${e(r)}</p></li>`).join("");
+  const slots = seminars.map((s) => {
+    const t = theme(s.n);
+    return `<a class="slot" href="/seminars/${s.slug}/" style="--accent:${t.accent};--soft:${t.soft}">
+      <span class="slot-top"><span>Слот ${pad(s.n)}</span><code>${e(s.artifact.repo)}</code></span>
       <h3>${e(s.artifact.name)}</h3>
       <p>${e(s.title)}</p>
       <span class="slot-state">Слот пуст</span>
-    </a>`).join("");
+    </a>`;
+  }).join("");
 
-  const body = `${pageHead({ plate: "Плата 04", title: "Артефакты", lead: e(artifacts_page.lead) })}
-
-<section class="section wrap" id="rules">
-  ${secHead("01", "Правила", "Пять правил артефакта")}
-  <ol class="rule-list">${rules}</ol>
+  const body = `${pageHead({ plate: "Артефакты", label: "8 репозиториев", title: "Артефакт вместо конспекта", lead: e(artifacts_page.lead) })}
+<section class="band band--paper" id="rules">
+  <div class="wrap">
+    ${secHead("01 · Правила", "Пять правил артефакта")}
+    <ol class="rule-list rule-list--lg">${rules}</ol>
+  </div>
 </section>
 
-<section class="section wrap" id="anatomy">
-  ${secHead("02", "Анатомия", "Что лежит в репозитории")}
-  <div class="anatomy">
-    <p class="mono">Стандартное дерево</p>
+<section class="band band--ink" id="anatomy">
+  <div class="wrap anatomy">
+    <p class="eyebrow eyebrow--warm">02 · Анатомия</p>
+    <h2>Что лежит в репозитории</h2>
     <ul class="tree tree--lg">${anatomy}</ul>
   </div>
 </section>
 
-<section class="section wrap" id="submit">
-  ${secHead("03", "Сдача", "Как сдавать")}
-  <ol class="rule-list">${submit}</ol>
+<section class="band" id="submit">
+  <div class="wrap">
+    ${secHead("03 · Сдача", "Как сдавать")}
+    <ol class="rule-list">${submit}</ol>
+  </div>
 </section>
 
-<section class="section wrap" id="showcase">
-  ${secHead("04", "Витрина", "Восемь слотов")}
-  <div class="showcase-note">
-    <p class="mono">Курс ещё не читался</p>
-    <p>Витрина пустая: восемь слотов ниже отведены под первые работы. Заполнять их вымышленными проектами мы не стали. Пока в слоте только имя репозитория и название артефакта из программы.</p>
+<section class="band band--tint" id="showcase">
+  <div class="wrap">
+    ${secHead("04 · Витрина", "Восемь слотов", "Курс ещё не читался. Витрина пустая: места под первые работы, без вымышленных проектов.")}
+    <div class="slots">${slots}</div>
   </div>
-  <div class="slots">${slots}</div>
 </section>`;
 
   return layout({
@@ -763,35 +911,46 @@ function artifactsPage() {
     active: "artifacts",
     body,
     pagePath: "artifacts/",
+    accent: PAGE_ACCENT.artifacts,
   });
 }
 
 // ---------------------------------------------------------------- literature
 
 function literaturePage() {
+  const covers = seminars.map((s) => `<a class="book-link" href="/seminars/${s.slug}/" aria-label="Семинар ${pad(s.n)}: ${e(s.title)}">${bookCover(s.reading[0], s)}</a>`).join("");
   const groups = seminars.map((s) => `<section class="lit-group" id="s${s.n}">
     <div class="lit-head">
-      <p class="mono">Семинар ${pad(s.n)} · ${e(s.week)}</p>
-      <h2><a href="/seminars/${s.slug}/">${e(s.title)} <span aria-hidden="true">↗</span></a></h2>
-      <p class="mono lit-place">${e(s.place)}</p>
+      <div><p class="eyebrow"><span class="tick" aria-hidden="true"></span>Семинар ${pad(s.n)} · ${e(s.week)}</p><h2><a href="/seminars/${s.slug}/">${e(s.title)} <span aria-hidden="true">→</span></a></h2></div>
+      <p class="lit-place">${e(s.place)}</p>
     </div>
     ${readingBlock(s)}
   </section>`).join("");
 
-  const body = `${pageHead({ plate: "Плата 05", title: "Литература", lead: `${readingCount} источника, по три на каждый семинар. У каждого есть аннотация и пометка о доступе.` })}
+  const body = `${pageHead({ plate: "Литература", label: `${readingCount} источника`, title: "Что читать к каждому кейсу", lead: "Три источника на семинар: справочник, аналитика и пример жанра. У каждого есть аннотация и пометка о доступе." })}
+<section class="band band--paper" id="core">
+  <div class="wrap">
+    ${secHead("01 · Основное", "Восемь книг", "Первый источник каждого кейса. Обложки собраны типографикой, без чужих изображений.")}
+    <div class="book-grid">${covers}</div>
+  </div>
+</section>
 
-<section class="section wrap" id="note">
-  <p class="access-note"><span class="mono">Доступ.</span> Ссылка ведёт туда, где источник опубликован. Там, где ссылки нет, стоит «в библиотеке»: открытого доступа к изданию нет.</p>
+<section class="band band--tint" id="note">
+  <div class="wrap access-note">
+    <p class="eyebrow">Доступ</p>
+    <p>Ссылка ведёт туда, где источник опубликован. Два издания выходят без открытой ссылки: они помечены «закрытый доступ · в библиотеке». Мы не подменяем их ссылками на неофициальные копии.</p>
+  </div>
 </section>
 
 <div class="wrap lit-list">${groups}</div>`;
 
   return layout({
     title: `Литература · ${meta.title}`,
-    description: `Все ${readingCount} источника курса «${meta.title}» по семинарам, с аннотациями и пометкой о доступе.`,
+    description: `Все ${readingCount} источника курса «${meta.title}» по кейсам, с аннотациями и пометкой о доступе.`,
     active: "literature",
     body,
     pagePath: "reading/",
+    accent: PAGE_ACCENT.literature,
   });
 }
 
@@ -799,21 +958,24 @@ function literaturePage() {
 
 function notFoundPage() {
   const body = `${mapSprite()}
-${pageHead({ plate: "Ошибка 404", title: "Такой точки на карте нет", lead: "Адрес не совпал ни с одной страницей курса. Ниже — восемь семинаров и разделы, из которых состоит сайт." })}
-<section class="section wrap">
-  <div class="actions">
-    <a class="btn" href="/">На главную</a>
-    <a class="btn btn--ghost" href="/seminars/">Все семинары</a>
+${pageHead({ plate: "Ошибка 404", label: "Нет такой точки", title: "Такой точки на карте нет", lead: "Адрес не совпал ни с одной страницей курса. Ниже — восемь кейсов, из которых состоит сайт." })}
+<section class="band band--ink">
+  <div class="wrap">
+    <div class="actions">
+      <a class="btn btn--cream" href="/">На главную</a>
+      <a class="btn btn--ghost-light" href="/seminars/">Все кейсы</a>
+    </div>
+    <div class="notfound-map">${worldStage("/")}</div>
   </div>
-  ${worldPlate("/")}
 </section>`;
 
   return layout({
     title: `Страница не найдена · ${meta.title}`,
-    description: "Страница не найдена. Восемь семинаров, методика, артефакты и литература курса.",
+    description: "Страница не найдена. Восемь кейсов, методика, артефакты и литература курса.",
     active: "",
     body,
     pagePath: "404.html",
+    accent: PAGE_ACCENT.error,
   });
 }
 
@@ -842,10 +1004,12 @@ fs.mkdirSync(path.join(OUT, "assets", "fonts"), { recursive: true });
 fs.copyFileSync(path.join(ROOT, "src", "styles.css"), path.join(OUT, "assets", "styles.css"));
 fs.copyFileSync(path.join(ROOT, "src", "app.js"), path.join(OUT, "assets", "app.js"));
 fs.copyFileSync(path.join(ROOT, "assets", "fonts.css"), path.join(OUT, "assets", "fonts.css"));
-fs.copyFileSync(path.join(ROOT, "assets", "favicon.svg"), path.join(OUT, "favicon.svg"));
 for (const f of fs.readdirSync(path.join(ROOT, "assets", "fonts"))) {
   if (f.endsWith(".woff2")) fs.copyFileSync(path.join(ROOT, "assets", "fonts", f), path.join(OUT, "assets", "fonts", f));
 }
+
+const favicon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#0C1E2A"/><circle cx="32" cy="30" r="17" fill="none" stroke="#F6F1E7" stroke-width="2.4"/><path d="M15 30h34M32 13c8 8 8 26 0 34M32 13c-8 8-8 26 0 34" stroke="#F6F1E7" stroke-width="1.5" opacity=".55" fill="none"/><circle cx="43" cy="18" r="6" fill="#C24B2A" stroke="#0C1E2A" stroke-width="2.5"/></svg>`;
+fs.writeFileSync(path.join(OUT, "favicon.svg"), favicon);
 
 const routes = [
   "", "course/", "seminars/", ...seminars.map((s) => `seminars/${s.slug}/`),

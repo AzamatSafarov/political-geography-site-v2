@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-mode="student">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,192 +12,183 @@
 <meta property="og:title" content="Методика · Политическая география">
 <meta property="og:description" content="Три такта семинара, шкала ICAP, восемь форматов с точками отказа, правила для тридцати человек и соседи по жанру.">
 <meta property="og:url" content="https://political-geography-v2.vercel.app/method/">
-<meta name="theme-color" content="#f2eee3">
+<meta name="theme-color" content="#0C1E2A">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/assets/styles.css">
 <script>document.documentElement.classList.add("js")</script>
 </head>
-<body>
+<body class="" style="--page-accent:#14605F">
 <a class="skip" href="#main">Перейти к содержанию</a>
-<header class="masthead">
-  <div class="wrap masthead-in">
+<header class="site-head">
+  <div class="wrap head-in">
     <a class="brand" href="/">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <span class="brand-name">Политическая география</span>
-      <span class="brand-meta">2026</span>
+      <svg class="mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect width="40" height="40" fill="#0C1E2A"/><circle cx="20" cy="19" r="11" fill="none" stroke="#F6F1E7" stroke-width="1.6"/><path d="M9 19h22M20 8c5 5 5 17 0 22M20 8c-5 5-5 17 0 22" stroke="#F6F1E7" stroke-width="1" opacity=".5" fill="none"/><circle cx="27" cy="12" r="4.2" fill="#C24B2A" stroke="#0C1E2A" stroke-width="1.6"/></svg>
+      <span class="brand-text"><b>Политическая география</b><i>курс · 2026</i></span>
     </a>
-    <nav class="nav" aria-label="Основная навигация"><a href="/">Главная</a><a href="/course/">Дисциплина</a><a href="/seminars/">Семинары</a><a href="/method/" aria-current="page">Методика</a><a href="/artifacts/">Артефакты</a><a href="/reading/">Литература</a></nav>
+    <nav class="nav" aria-label="Основная навигация"><a href="/">Главная</a><a href="/seminars/">Кейсы</a><a href="/course/">Дисциплина</a><a href="/method/" aria-current="page">Методика</a><a href="/artifacts/">Артефакты</a><a href="/reading/">Литература</a></nav>
+    <div class="mode" role="group" aria-label="Режим просмотра">
+      <button type="button" data-set-mode="student" aria-pressed="true">Студент</button>
+      <button type="button" data-set-mode="teacher" aria-pressed="false">Преподаватель</button>
+    </div>
   </div>
 </header>
+<div class="teacher-banner teacher-only"><div class="wrap"><span>Режим преподавателя: открыты ответы, роли в комнате и таймер.</span><button type="button" data-set-mode="student">Выйти</button></div></div>
 <main id="main">
-<header class="page-head wrap">
-  <p class="kicker mono"><span class="tick" aria-hidden="true"></span>Плата 03</p>
-  <h1>Методика</h1>
-  <p class="lead measure">Методика здесь не украшение. Каждый формат выбран под конкретный тип мышления, который нужно натренировать, и под ограничение: 90 минут, 30 человек, один преподаватель.</p>
+<header class="page-head">
+  <div class="wrap">
+    <p class="eyebrow"><span class="tick" aria-hidden="true"></span>Методика · 90 минут</p>
+    <h1>Как устроен семинар</h1>
+    <p class="page-lead">Методика здесь не украшение. Каждый формат выбран под конкретный тип мышления, который нужно натренировать, и под ограничение: 90 минут, 30 человек, один преподаватель.</p>
+  </div>
 </header>
-
-<section class="section wrap" id="tacts">
-  <div class="sec-head">
-  <p class="mono sec-label"><span class="tick" aria-hidden="true"></span>01 / Такты</p>
+<section class="band band--paper" id="tacts">
+  <div class="wrap">
+    <header class="sec-head">
+  <p class="eyebrow"><span class="tick" aria-hidden="true"></span>01 · Такты</p>
   <h2>Вход, работа, фиксация</h2>
   
-</div>
-  <ol class="tact-list"><li class="tact">
-      <span class="tact-n mono" aria-hidden="true">01</span>
-      <div><span class="tact-time mono">5–8 мин</span><h3>Вход</h3><p>Письменный ответ на один вопрос, без обсуждения. Это retrieval practice: студент достаёт знание из памяти, а не узнаёт его в тексте. Преподаватель видит, что реально осталось с прошлого раза.</p></div>
-    </li><li class="tact">
-      <span class="tact-n mono" aria-hidden="true">02</span>
-      <div><span class="tact-time mono">60–75 мин</span><h3>Работа</h3><p>Формат семинара. Общее правило: не меньше 60% времени студент говорит, пишет или строит. Лекционных вставок не больше трёх по пять минут.</p></div>
-    </li><li class="tact">
-      <span class="tact-n mono" aria-hidden="true">03</span>
-      <div><span class="tact-time mono">5–8 мин</span><h3>Фиксация</h3><p>Одна строка, которая меняет предыдущее убеждение. Не конспект — след. Именно она попадает в репозиторий и через неделю проверяется на входе следующего семинара.</p></div>
-    </li></ol>
+</header>
+    <ol class="tact-grid"><li><span class="tact-time">5–8 мин</span><h3>Вход</h3><p>Письменный ответ на один вопрос, без обсуждения. Это retrieval practice: студент достаёт знание из памяти, а не узнаёт его в тексте. Преподаватель видит, что реально осталось с прошлого раза.</p></li><li><span class="tact-time">60–75 мин</span><h3>Работа</h3><p>Формат семинара. Общее правило: не меньше 60% времени студент говорит, пишет или строит. Лекционных вставок не больше трёх по пять минут.</p></li><li><span class="tact-time">5–8 мин</span><h3>Фиксация</h3><p>Одна строка, которая меняет предыдущее убеждение. Не конспект — след. Именно она попадает в репозиторий и через неделю проверяется на входе следующего семинара.</p></li></ol>
+  </div>
 </section>
 
-<section class="section wrap" id="icap">
-  <div class="sec-head">
-  <p class="mono sec-label"><span class="tick" aria-hidden="true"></span>02 / Шкала</p>
+<section class="band band--tint" id="icap">
+  <div class="wrap">
+    <header class="sec-head">
+  <p class="eyebrow"><span class="tick" aria-hidden="true"></span>02 · Шкала</p>
   <h2>Почему форматы разные, а требование одно</h2>
-  
-</div>
-  <p class="sec-intro">Разные форматы нужны не для разнообразия. Они вытаскивают разные типы работы с материалом. Ориентир — шкала ICAP: пассивное (слушать), активное (делать по образцу), конструктивное (строить своё объяснение), интерактивное (строить его вместе с другим, который возражает). Семинар считается удавшимся, если большую часть времени группа находится в двух последних режимах.</p>
-  <ol class="icap-grid"><li class="icap-level">
-      <span class="icap-key" aria-hidden="true">P</span>
-      <h3>Пассивно</h3>
-      <p>Слушать, читать, смотреть</p>
-      <span class="icap-share mono">0–10%</span>
+  <p class="sec-lead">Разные форматы нужны не для разнообразия. Они вытаскивают разные типы работы с материалом. Ориентир — шкала ICAP: пассивное (слушать), активное (делать по образцу), конструктивное (строить своё объяснение), интерактивное (строить его вместе с другим, который возражает). Семинар считается удавшимся, если большую часть времени группа находится в двух последних режимах.</p>
+</header>
+    <ol class="icap-grid"><li class="icap-level">
+      <span class="icap-key">P</span>
+      <div><h3>Пассивно</h3><p>Слушать, читать, смотреть</p><span class="icap-share">0–10%</span></div>
     </li><li class="icap-level">
-      <span class="icap-key" aria-hidden="true">A</span>
-      <h3>Активно</h3>
-      <p>Выполнять по инструкции, заполнять</p>
-      <span class="icap-share mono">10–20%</span>
+      <span class="icap-key">A</span>
+      <div><h3>Активно</h3><p>Выполнять по инструкции, заполнять</p><span class="icap-share">10–20%</span></div>
     </li><li class="icap-level">
-      <span class="icap-key" aria-hidden="true">C</span>
-      <h3>Конструктивно</h3>
-      <p>Объяснять своими словами, строить схему</p>
-      <span class="icap-share mono">40–50%</span>
+      <span class="icap-key">C</span>
+      <div><h3>Конструктивно</h3><p>Объяснять своими словами, строить схему</p><span class="icap-share">40–50%</span></div>
     </li><li class="icap-level">
-      <span class="icap-key" aria-hidden="true">I</span>
-      <h3>Интерактивно</h3>
-      <p>Спорить, защищать, договариваться</p>
-      <span class="icap-share mono">30–40%</span>
+      <span class="icap-key">I</span>
+      <div><h3>Интерактивно</h3><p>Спорить, защищать, договариваться</p><span class="icap-share">30–40%</span></div>
     </li></ol>
+  </div>
 </section>
 
-<section class="section wrap" id="formats">
-  <div class="sec-head">
-  <p class="mono sec-label"><span class="tick" aria-hidden="true"></span>03 / Форматы</p>
+<section class="band" id="formats">
+  <div class="wrap">
+    <header class="sec-head">
+  <p class="eyebrow"><span class="tick" aria-hidden="true"></span>03 · Форматы</p>
   <h2>Восемь форматов и где они ломаются</h2>
   
-</div>
-  <ol class="formats"><li class="format">
-      <span class="format-n mono" aria-hidden="true">01</span>
+</header>
+    <ol class="formats"><li class="format">
+      <span class="format-glyph"><svg class="glyph" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M11 18a13 13 0 0 1 21-4"/><path d="M37 30a13 13 0 0 1-21 4"/><path d="M32 8l1 6-6-1"/><path d="M16 40l-1-6 6 1"/></svg></span>
       <div class="format-body">
-        <div class="format-head"><h3>Структурный академический спор</h3><span class="tag">SAC</span></div>
+        <div class="format-head"><span class="format-n">01</span><h3>Структурный академический спор</h3><span class="tag">SAC</span></div>
         <p>Позиция → слушание → смена стороны → синтез. Даёт навык держать чужой аргумент как свой. Ломается, если группы не меняются местами: без смены получается обычный дебат.</p>
-        <p class="format-where mono">Семинар 1</p>
+        <span class="format-where">Семинар 1</span>
       </div>
     </li><li class="format">
-      <span class="format-n mono" aria-hidden="true">02</span>
+      <span class="format-glyph"><svg class="glyph" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><circle cx="24" cy="24" r="3"/><circle cx="24" cy="10" r="2.5"/><circle cx="37" cy="18" r="2.5"/><circle cx="33" cy="35" r="2.5"/><circle cx="15" cy="35" r="2.5"/><circle cx="11" cy="18" r="2.5"/><path d="M24 13v8M34 20l-7 3M30 33l-4-6M18 33l3-6M14 20l7 3"/></svg></span>
       <div class="format-body">
-        <div class="format-head"><h3>Кризисная симуляция</h3><span class="tag">Симуляция</span></div>
+        <div class="format-head"><span class="format-n">02</span><h3>Кризисная симуляция</h3><span class="tag">Симуляция</span></div>
         <p>Роли, ограниченное время, вводные, которые меняют правила. Даёт цену решения. Ломается, если правила размыты или если один игрок доминирует — нужен таймер и секретариат.</p>
-        <p class="format-where mono">Семинар 2</p>
+        <span class="format-where">Семинар 2</span>
       </div>
     </li><li class="format">
-      <span class="format-n mono" aria-hidden="true">03</span>
+      <span class="format-glyph"><svg class="glyph" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><rect x="8" y="9" width="14" height="14"/><rect x="26" y="9" width="14" height="14"/><rect x="8" y="27" width="14" height="14"/><path d="M26 27h14v14H26"/><path d="M22 16h4M22 34h4M15 23v4M33 23v4"/></svg></span>
       <div class="format-body">
-        <div class="format-head"><h3>Jigsaw</h3><span class="tag">Jigsaw</span></div>
+        <div class="format-head"><span class="format-n">03</span><h3>Jigsaw</h3><span class="tag">Jigsaw</span></div>
         <p>Экспертная группа → пересборка. Даёт глубину по трём кейсам сразу. Ломается, если оси сравнения заданы после работы с материалом, — тогда группа обсуждает кейсы, а не сравнивает их.</p>
-        <p class="format-where mono">Семинар 3</p>
+        <span class="format-where">Семинар 3</span>
       </div>
     </li><li class="format">
-      <span class="format-n mono" aria-hidden="true">04</span>
+      <span class="format-glyph"><svg class="glyph" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><ellipse cx="24" cy="26" rx="13" ry="7"/><circle cx="24" cy="10" r="3"/><circle cx="10" cy="19" r="3"/><circle cx="38" cy="19" r="3"/><circle cx="15" cy="40" r="3"/><circle cx="33" cy="40" r="3"/><path d="M24 13v6M13 21l5 3M35 21l-5 3M17 37l4-4M31 37l-4-4"/></svg></span>
       <div class="format-body">
-        <div class="format-head"><h3>Переговорная игра</h3><span class="tag">Игра</span></div>
+        <div class="format-head"><span class="format-n">04</span><h3>Переговорная игра</h3><span class="tag">Игра</span></div>
         <p>Мандаты, интересы, сделка. Даёт понимание асимметрии. Ломается, если нет внешнего арбитра, объявляющего условия рынка.</p>
-        <p class="format-where mono">Семинар 4</p>
+        <span class="format-where">Семинар 4</span>
       </div>
     </li><li class="format">
-      <span class="format-n mono" aria-hidden="true">05</span>
+      <span class="format-glyph"><svg class="glyph" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M24 6l14 5v11c0 9-6 15-14 20-8-5-14-11-14-20V11z"/><path d="M12 16l8 6M36 16l-8 6"/><path d="M9 12l5 1-1 5M39 12l-5 1 1 5"/></svg></span>
       <div class="format-body">
-        <div class="format-head"><h3>Red team</h3><span class="tag">Red team</span></div>
+        <div class="format-head"><span class="format-n">05</span><h3>Red team</h3><span class="tag">Red team</span></div>
         <p>Защита проекта против атаки на допущения. Даёт навык проверять модель. Ломается, если атакующие бьют по выводам, а не по числам, — правило нужно объявить заранее.</p>
-        <p class="format-where mono">Семинар 5</p>
+        <span class="format-where">Семинар 5</span>
       </div>
     </li><li class="format">
-      <span class="format-n mono" aria-hidden="true">06</span>
+      <span class="format-glyph"><svg class="glyph" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M24 6L8 15h32z"/><path d="M8 15v3h32v-3"/><path d="M13 21v14M24 21v14M35 21v14"/><path d="M9 39h30"/></svg></span>
       <div class="format-body">
-        <div class="format-head"><h3>Модельный суд</h3><span class="tag">Суд</span></div>
+        <div class="format-head"><span class="format-n">06</span><h3>Модельный суд</h3><span class="tag">Суд</span></div>
         <p>Стороны, регламент, заключение. Даёт строгость и различение права и политики. Ломается без регламента: без него получается дискуссия о справедливости.</p>
-        <p class="format-where mono">Семинар 6</p>
+        <span class="format-where">Семинар 6</span>
       </div>
     </li><li class="format">
-      <span class="format-n mono" aria-hidden="true">07</span>
+      <span class="format-glyph"><svg class="glyph" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><circle cx="9" cy="24" r="2.5"/><circle cx="22" cy="24" r="2.5"/><circle cx="35" cy="24" r="2.5"/><path d="M12 24h7M25 24h7"/><path d="M30 24l5-8M30 24l5 8"/><path d="M35 10v8h8"/></svg></span>
       <div class="format-body">
-        <div class="format-head"><h3>Дизайн-спринт</h3><span class="tag">Спринт</span></div>
+        <div class="format-head"><span class="format-n">07</span><h3>Дизайн-спринт</h3><span class="tag">Спринт</span></div>
         <p>Данные → риск → мера → питч за один такт. Даёт сжатие анализа до решения. Ломается, если не ограничить время питча тремя минутами.</p>
-        <p class="format-where mono">Семинар 7</p>
+        <span class="format-where">Семинар 7</span>
       </div>
     </li><li class="format">
-      <span class="format-n mono" aria-hidden="true">08</span>
+      <span class="format-glyph"><svg class="glyph" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M7 12h14v12H7zM27 12h14v12H27zM17 30h14v11H17z"/><path d="M11 24v3M37 24v3M21 30v-3M27 30v-3M24 41v-4"/></svg></span>
       <div class="format-body">
-        <div class="format-head"><h3>Выставка и рецензия</h3><span class="tag">Выставка</span></div>
+        <div class="format-head"><span class="format-n">08</span><h3>Выставка и рецензия</h3><span class="tag">Выставка</span></div>
         <p>Стенды, раунды, письменная рецензия. Даёт синтез и навык оценки. Ломается, если рецензии устные: письменная форма заставляет назвать критерий.</p>
-        <p class="format-where mono">Семинар 8</p>
+        <span class="format-where">Семинар 8</span>
       </div>
     </li></ol>
+  </div>
 </section>
 
-<section class="section wrap" id="thirty">
-  <div class="sec-head">
-  <p class="mono sec-label"><span class="tick" aria-hidden="true"></span>04 / 30 человек</p>
-  <h2>Правила для тридцати</h2>
-  
-</div>
-  <div class="group-note"><p class="mono">Одна комната, один преподаватель</p><p>Тридцать человек — это шесть групп по пять или три по десять. Правило курса: за 90 минут каждый произносит содержательную реплику не меньше двух раз. Проверяется просто: в каждой группе есть хранитель времени и счётчик, который отмечает молчание дольше десяти минут.</p></div>
+<section class="band band--ink" id="thirty">
+  <div class="wrap group-note">
+    <p class="eyebrow eyebrow--warm">04 · 30 человек</p>
+    <h2>Одна комната, один преподаватель</h2>
+    <p>Тридцать человек — это шесть групп по пять или три по десять. Правило курса: за 90 минут каждый произносит содержательную реплику не меньше двух раз. Проверяется просто: в каждой группе есть хранитель времени и счётчик, который отмечает молчание дольше десяти минут.</p>
+  </div>
 </section>
 
-<section class="section wrap" id="neighbors">
-  <div class="sec-head">
-  <p class="mono sec-label"><span class="tick" aria-hidden="true"></span>05 / Контекст</p>
+<section class="band band--tint" id="neighbors">
+  <div class="wrap">
+    <header class="sec-head">
+  <p class="eyebrow"><span class="tick" aria-hidden="true"></span>05 · Контекст</p>
   <h2>Соседи по жанру</h2>
-  <p class="sec-intro measure">Сайт курса — не новая форма. Ниже четыре реализованных случая, у которых мы сознательно заимствуем структуру, и то, чего у них нет.</p>
-</div>
-  <ol class="neighbors"><li class="neighbor">
-      <div class="neighbor-head"><h3><a href="https://missing.csail.mit.edu/" target="_blank" rel="noopener">The Missing Semester <span aria-hidden="true">↗</span></a></h3><span class="mono">MIT</span></div>
-      <p><span class="mono">Берём.</span> Курс целиком живёт на сайте: программа, записи, упражнения. Берём принцип «одна тема — одна страница с заданием в конце».</p>
-      <p><span class="mono">Чего нет.</span> Нет студенческих работ: сайт — витрина преподавателя.</p>
+  <p class="sec-lead">Сайт курса — не новая форма. Ниже четыре реализованных случая, у которых мы сознательно заимствуем структуру, и то, чего у них нет.</p>
+</header>
+    <ol class="neighbors"><li class="neighbor">
+      <div class="neighbor-head"><h3><a href="https://missing.csail.mit.edu/" target="_blank" rel="noopener">The Missing Semester <span aria-hidden="true">↗</span></a></h3><span>MIT</span></div>
+      <p><b>Берём.</b> Курс целиком живёт на сайте: программа, записи, упражнения. Берём принцип «одна тема — одна страница с заданием в конце».</p>
+      <p><b>Чего нет.</b> Нет студенческих работ: сайт — витрина преподавателя.</p>
     </li><li class="neighbor">
-      <div class="neighbor-head"><h3><span>CS50</span></h3><span class="mono">Harvard</span></div>
-      <p><span class="mono">Берём.</span> Недели, задачи, критерии, «как сдать». Берём жёсткую связку «неделя → артефакт → проверка».</p>
-      <p><span class="mono">Чего нет.</span> Студенческие проекты не видны на сайте курса.</p>
+      <div class="neighbor-head"><h3><span>CS50</span></h3><span>Harvard</span></div>
+      <p><b>Берём.</b> Недели, задачи, критерии, «как сдать». Берём жёсткую связку «неделя → артефакт → проверка».</p>
+      <p><b>Чего нет.</b> Студенческие проекты не видны на сайте курса.</p>
     </li><li class="neighbor">
-      <div class="neighbor-head"><h3><span>MIT OpenCourseWare</span></h3><span class="mono">MIT</span></div>
-      <p><span class="mono">Берём.</span> Архивная структура: программа, календарь, материалы. Берём дисциплину оглавления и единый формат страниц.</p>
-      <p><span class="mono">Чего нет.</span> Архив статичен и не показывает, что получилось у студентов.</p>
+      <div class="neighbor-head"><h3><span>MIT OpenCourseWare</span></h3><span>MIT</span></div>
+      <p><b>Берём.</b> Архивная структура: программа, календарь, материалы. Берём дисциплину оглавления и единый формат страниц.</p>
+      <p><b>Чего нет.</b> Архив статичен и не показывает, что получилось у студентов.</p>
     </li><li class="neighbor">
-      <div class="neighbor-head"><h3><a href="https://geocurrents.info/" target="_blank" rel="noopener">Geocurrents <span aria-hidden="true">↗</span></a></h3><span class="mono">Martin Lewis</span></div>
-      <p><span class="mono">Берём.</span> Жанр короткого политико-географического разбора с картой. Берём тон и роль карты как аргумента.</p>
-      <p><span class="mono">Чего нет.</span> Это блог, а не курс: нет заданий и оценки.</p>
+      <div class="neighbor-head"><h3><a href="https://geocurrents.info/" target="_blank" rel="noopener">Geocurrents <span aria-hidden="true">↗</span></a></h3><span>Martin Lewis</span></div>
+      <p><b>Берём.</b> Жанр короткого политико-географического разбора с картой. Берём тон и роль карты как аргумента.</p>
+      <p><b>Чего нет.</b> Это блог, а не курс: нет заданий и оценки.</p>
     </li></ol>
+  </div>
 </section>
 </main>
-<footer class="footer">
-  <div class="wrap footer-in">
-    <div class="footer-brand">
-      <p class="f-title">Политическая география</p>
-      <p class="f-sub">Восемь семинаров о том, как устроена причинность во внешней политике</p>
+<footer class="site-foot">
+  <div class="wrap foot-grid">
+    <div class="foot-brand">
+      <a class="brand brand--light" href="/"><svg class="mark mark--light" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect width="40" height="40" fill="#0C1E2A"/><circle cx="20" cy="19" r="11" fill="none" stroke="#F6F1E7" stroke-width="1.6"/><path d="M9 19h22M20 8c5 5 5 17 0 22M20 8c-5 5-5 17 0 22" stroke="#F6F1E7" stroke-width="1" opacity=".5" fill="none"/><circle cx="27" cy="12" r="4.2" fill="#C24B2A" stroke="#0C1E2A" stroke-width="1.6"/></svg><span class="brand-text"><b>Политическая география</b><i>Восемь семинаров о том, как устроена причинность во внешней политике</i></span></a>
     </div>
-    <nav class="footer-nav" aria-label="Навигация в подвале"><a href="/">Главная</a><a href="/course/">Дисциплина</a><a href="/seminars/">Семинары</a><a href="/method/">Методика</a><a href="/artifacts/">Артефакты</a><a href="/reading/">Литература</a></nav>
-    <dl class="footer-meta">
+    <nav class="foot-nav" aria-label="Навигация в подвале"><a href="/">Главная</a><a href="/seminars/">Кейсы</a><a href="/course/">Дисциплина</a><a href="/method/">Методика</a><a href="/artifacts/">Артефакты</a><a href="/reading/">Литература</a></nav>
+    <dl class="foot-meta">
       <div><dt>Подразделение</dt><dd>[Факультет / кафедра]</dd></div>
       <div><dt>Семестр</dt><dd>Один семестр · 8 недель</dd></div>
-      <div><dt>Аудитория</dt><dd>30 студентов</dd></div>
-      <div><dt>Контактная работа</dt><dd>8 семинаров × 90 минут</dd></div>
     </dl>
-    <p class="colophon">Карты: Natural Earth 110m, проекция Робинсона. Шрифты: Golos Text, Literata, IBM Plex Mono. Собрано из content.json.</p>
+    <p class="colophon">Карты: Natural Earth 110m, проекция Робинсона. Шрифты: Golos Text, Literata, IBM Plex Mono. Тексты и числа собраны из content.json.</p>
   </div>
 </footer>
 <script src="/assets/app.js" defer></script>

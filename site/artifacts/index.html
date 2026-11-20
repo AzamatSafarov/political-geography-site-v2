@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-mode="student">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,128 +12,128 @@
 <meta property="og:title" content="Артефакты · Политическая география">
 <meta property="og:description" content="Правила артефактов, анатомия репозитория и восемь пустых слотов витрины: курс ещё не читался.">
 <meta property="og:url" content="https://political-geography-v2.vercel.app/artifacts/">
-<meta name="theme-color" content="#f2eee3">
+<meta name="theme-color" content="#0C1E2A">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/assets/styles.css">
 <script>document.documentElement.classList.add("js")</script>
 </head>
-<body>
+<body class="" style="--page-accent:#5E3F7E">
 <a class="skip" href="#main">Перейти к содержанию</a>
-<header class="masthead">
-  <div class="wrap masthead-in">
+<header class="site-head">
+  <div class="wrap head-in">
     <a class="brand" href="/">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <span class="brand-name">Политическая география</span>
-      <span class="brand-meta">2026</span>
+      <svg class="mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect width="40" height="40" fill="#0C1E2A"/><circle cx="20" cy="19" r="11" fill="none" stroke="#F6F1E7" stroke-width="1.6"/><path d="M9 19h22M20 8c5 5 5 17 0 22M20 8c-5 5-5 17 0 22" stroke="#F6F1E7" stroke-width="1" opacity=".5" fill="none"/><circle cx="27" cy="12" r="4.2" fill="#C24B2A" stroke="#0C1E2A" stroke-width="1.6"/></svg>
+      <span class="brand-text"><b>Политическая география</b><i>курс · 2026</i></span>
     </a>
-    <nav class="nav" aria-label="Основная навигация"><a href="/">Главная</a><a href="/course/">Дисциплина</a><a href="/seminars/">Семинары</a><a href="/method/">Методика</a><a href="/artifacts/" aria-current="page">Артефакты</a><a href="/reading/">Литература</a></nav>
+    <nav class="nav" aria-label="Основная навигация"><a href="/">Главная</a><a href="/seminars/">Кейсы</a><a href="/course/">Дисциплина</a><a href="/method/">Методика</a><a href="/artifacts/" aria-current="page">Артефакты</a><a href="/reading/">Литература</a></nav>
+    <div class="mode" role="group" aria-label="Режим просмотра">
+      <button type="button" data-set-mode="student" aria-pressed="true">Студент</button>
+      <button type="button" data-set-mode="teacher" aria-pressed="false">Преподаватель</button>
+    </div>
   </div>
 </header>
+<div class="teacher-banner teacher-only"><div class="wrap"><span>Режим преподавателя: открыты ответы, роли в комнате и таймер.</span><button type="button" data-set-mode="student">Выйти</button></div></div>
 <main id="main">
-<header class="page-head wrap">
-  <p class="kicker mono"><span class="tick" aria-hidden="true"></span>Плата 04</p>
-  <h1>Артефакты</h1>
-  <p class="lead measure">Восемь репозиториев — восемь доказательств. Артефакт считается сданным, если его можно открыть без объяснений автора и проверить каждое утверждение.</p>
+<header class="page-head">
+  <div class="wrap">
+    <p class="eyebrow"><span class="tick" aria-hidden="true"></span>Артефакты · 8 репозиториев</p>
+    <h1>Артефакт вместо конспекта</h1>
+    <p class="page-lead">Восемь репозиториев — восемь доказательств. Артефакт считается сданным, если его можно открыть без объяснений автора и проверить каждое утверждение.</p>
+  </div>
 </header>
-
-<section class="section wrap" id="rules">
-  <div class="sec-head">
-  <p class="mono sec-label"><span class="tick" aria-hidden="true"></span>01 / Правила</p>
+<section class="band band--paper" id="rules">
+  <div class="wrap">
+    <header class="sec-head">
+  <p class="eyebrow"><span class="tick" aria-hidden="true"></span>01 · Правила</p>
   <h2>Пять правил артефакта</h2>
   
-</div>
-  <ol class="rule-list"><li><span class="mono" aria-hidden="true">01</span><p>README отвечает на три вопроса: что это, откуда данные, что здесь нельзя утверждать.</p></li><li><span class="mono" aria-hidden="true">02</span><p>Данные лежат отдельно от текста: CSV или JSON, а не таблица в Markdown.</p></li><li><span class="mono" aria-hidden="true">03</span><p>У каждого источника — дата и тип: официальный документ, аналитика, пресса.</p></li><li><span class="mono" aria-hidden="true">04</span><p>Схема читается без подписи: подписаны оси, единицы, годы.</p></li><li><span class="mono" aria-hidden="true">05</span><p>Ограничения модели — отдельный файл, а не сноска в конце.</p></li></ol>
+</header>
+    <ol class="rule-list rule-list--lg"><li><span>01</span><p>README отвечает на три вопроса: что это, откуда данные, что здесь нельзя утверждать.</p></li><li><span>02</span><p>Данные лежат отдельно от текста: CSV или JSON, а не таблица в Markdown.</p></li><li><span>03</span><p>У каждого источника — дата и тип: официальный документ, аналитика, пресса.</p></li><li><span>04</span><p>Схема читается без подписи: подписаны оси, единицы, годы.</p></li><li><span>05</span><p>Ограничения модели — отдельный файл, а не сноска в конце.</p></li></ol>
+  </div>
 </section>
 
-<section class="section wrap" id="anatomy">
-  <div class="sec-head">
-  <p class="mono sec-label"><span class="tick" aria-hidden="true"></span>02 / Анатомия</p>
-  <h2>Что лежит в репозитории</h2>
-  
-</div>
-  <div class="anatomy">
-    <p class="mono">Стандартное дерево</p>
+<section class="band band--ink" id="anatomy">
+  <div class="wrap anatomy">
+    <p class="eyebrow eyebrow--warm">02 · Анатомия</p>
+    <h2>Что лежит в репозитории</h2>
     <ul class="tree tree--lg"><li><span class="file">README.md</span><span class="desc">тезис, источник данных, ограничения</span></li><li><span class="file">data/</span><span class="desc">таблицы с числами и отдельный sources.md</span></li><li><span class="file">chart.svg</span><span class="desc">схема или график, читаемый без пояснений</span></li><li><span class="file">notes/</span><span class="desc">карточки входа, протокол дебрифинга</span></li><li><span class="file">LICENSE</span><span class="desc">по умолчанию CC BY 4.0 для текста и схем</span></li></ul>
   </div>
 </section>
 
-<section class="section wrap" id="submit">
-  <div class="sec-head">
-  <p class="mono sec-label"><span class="tick" aria-hidden="true"></span>03 / Сдача</p>
+<section class="band" id="submit">
+  <div class="wrap">
+    <header class="sec-head">
+  <p class="eyebrow"><span class="tick" aria-hidden="true"></span>03 · Сдача</p>
   <h2>Как сдавать</h2>
   
-</div>
-  <ol class="rule-list"><li><span class="mono" aria-hidden="true">01</span><p>Репозиторий создаётся в общем пространстве курса, имя — pg-NN-тема.</p></li><li><span class="mono" aria-hidden="true">02</span><p>Сдача — ссылка в общем документе до дедлайна; коммит после дедлайна фиксируется в истории и виден.</p></li><li><span class="mono" aria-hidden="true">03</span><p>Публичный доступ по умолчанию; закрытый репозиторий сдаётся архивом и оценивается ниже по критерию «открывается без пояснений».</p></li></ol>
+</header>
+    <ol class="rule-list"><li><span>01</span><p>Репозиторий создаётся в общем пространстве курса, имя — pg-NN-тема.</p></li><li><span>02</span><p>Сдача — ссылка в общем документе до дедлайна; коммит после дедлайна фиксируется в истории и виден.</p></li><li><span>03</span><p>Публичный доступ по умолчанию; закрытый репозиторий сдаётся архивом и оценивается ниже по критерию «открывается без пояснений».</p></li></ol>
+  </div>
 </section>
 
-<section class="section wrap" id="showcase">
-  <div class="sec-head">
-  <p class="mono sec-label"><span class="tick" aria-hidden="true"></span>04 / Витрина</p>
+<section class="band band--tint" id="showcase">
+  <div class="wrap">
+    <header class="sec-head">
+  <p class="eyebrow"><span class="tick" aria-hidden="true"></span>04 · Витрина</p>
   <h2>Восемь слотов</h2>
-  
-</div>
-  <div class="showcase-note">
-    <p class="mono">Курс ещё не читался</p>
-    <p>Витрина пустая: восемь слотов ниже отведены под первые работы. Заполнять их вымышленными проектами мы не стали. Пока в слоте только имя репозитория и название артефакта из программы.</p>
-  </div>
-  <div class="slots"><a class="slot" href="/seminars/01-djibouti/">
-      <span class="slot-top mono"><span>Слот 01</span><span>pg-01-djibouti</span></span>
+  <p class="sec-lead">Курс ещё не читался. Витрина пустая: места под первые работы, без вымышленных проектов.</p>
+</header>
+    <div class="slots"><a class="slot" href="/seminars/01-djibouti/" style="--accent:#A63A20;--soft:#F2D9CF">
+      <span class="slot-top"><span>Слот 01</span><code>pg-01-djibouti</code></span>
       <h3>Карта причинности</h3>
       <p>База в Джибути: три взгляда на одну точку</p>
       <span class="slot-state">Слот пуст</span>
-    </a><a class="slot" href="/seminars/02-chokepoints/">
-      <span class="slot-top mono"><span>Слот 02</span><span>pg-02-chokepoints</span></span>
+    </a><a class="slot" href="/seminars/02-chokepoints/" style="--accent:#14605F;--soft:#D5E6E1">
+      <span class="slot-top"><span>Слот 02</span><code>pg-02-chokepoints</code></span>
       <h3>Атлас узких мест</h3>
       <p>Горло мира: три пролива и цена зависимости</p>
       <span class="slot-state">Слот пуст</span>
-    </a><a class="slot" href="/seminars/03-unrecognized/">
-      <span class="slot-top mono"><span>Слот 03</span><span>pg-03-unrecognized</span></span>
+    </a><a class="slot" href="/seminars/03-unrecognized/" style="--accent:#5E3F7E;--soft:#E4DAEC">
+      <span class="slot-top"><span>Слот 03</span><code>pg-03-unrecognized</code></span>
       <h3>Сравнительная матрица</h3>
       <p>Непризнанные: суверенитет как практика</p>
       <span class="slot-state">Слот пуст</span>
-    </a><a class="slot" href="/seminars/04-minerals/">
-      <span class="slot-top mono"><span>Слот 04</span><span>pg-04-minerals</span></span>
+    </a><a class="slot" href="/seminars/04-minerals/" style="--accent:#7E520E;--soft:#EFE1C3">
+      <span class="slot-top"><span>Слот 04</span><code>pg-04-minerals</code></span>
       <h3>Атлас цепочки</h3>
       <p>Ресурсный треугольник: литий, кобальт, редкозёмы</p>
       <span class="slot-state">Слот пуст</span>
-    </a><a class="slot" href="/seminars/05-ports/">
-      <span class="slot-top mono"><span>Слот 05</span><span>pg-05-ports</span></span>
+    </a><a class="slot" href="/seminars/05-ports/" style="--accent:#27517A;--soft:#D8E3EE">
+      <span class="slot-top"><span>Слот 05</span><code>pg-05-ports</code></span>
       <h3>Меморандум по порту</h3>
       <p>Порт как власть: коридоры, концессии, долг</p>
       <span class="slot-state">Слот пуст</span>
-    </a><a class="slot" href="/seminars/06-climate/">
-      <span class="slot-top mono"><span>Слот 06</span><span>pg-06-climate</span></span>
+    </a><a class="slot" href="/seminars/06-climate/" style="--accent:#356848;--soft:#DAE7DC">
+      <span class="slot-top"><span>Слот 06</span><code>pg-06-climate</code></span>
       <h3>Правовой меморандум</h3>
       <p>Климат против территории: кто отвечает за тонущее государство</p>
       <span class="slot-state">Слот пуст</span>
-    </a><a class="slot" href="/seminars/07-cables/">
-      <span class="slot-top mono"><span>Слот 07</span><span>pg-07-cables</span></span>
+    </a><a class="slot" href="/seminars/07-cables/" style="--accent:#863049;--soft:#EFD8DE">
+      <span class="slot-top"><span>Слот 07</span><code>pg-07-cables</code></span>
       <h3>Риск-реестр</h3>
       <p>Кабели, спутники, данные: география без территории</p>
       <span class="slot-state">Слот пуст</span>
-    </a><a class="slot" href="/seminars/08-final/">
-      <span class="slot-top mono"><span>Слот 08</span><span>pg-08-portfolio</span></span>
+    </a><a class="slot" href="/seminars/08-final/" style="--accent:#7A4E22;--soft:#EADCC8">
+      <span class="slot-top"><span>Слот 08</span><code>pg-08-portfolio</code></span>
       <h3>Итоговое портфолио</h3>
       <p>Своя карта: конференция и взаимное рецензирование</p>
       <span class="slot-state">Слот пуст</span>
     </a></div>
+  </div>
 </section>
 </main>
-<footer class="footer">
-  <div class="wrap footer-in">
-    <div class="footer-brand">
-      <p class="f-title">Политическая география</p>
-      <p class="f-sub">Восемь семинаров о том, как устроена причинность во внешней политике</p>
+<footer class="site-foot">
+  <div class="wrap foot-grid">
+    <div class="foot-brand">
+      <a class="brand brand--light" href="/"><svg class="mark mark--light" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect width="40" height="40" fill="#0C1E2A"/><circle cx="20" cy="19" r="11" fill="none" stroke="#F6F1E7" stroke-width="1.6"/><path d="M9 19h22M20 8c5 5 5 17 0 22M20 8c-5 5-5 17 0 22" stroke="#F6F1E7" stroke-width="1" opacity=".5" fill="none"/><circle cx="27" cy="12" r="4.2" fill="#C24B2A" stroke="#0C1E2A" stroke-width="1.6"/></svg><span class="brand-text"><b>Политическая география</b><i>Восемь семинаров о том, как устроена причинность во внешней политике</i></span></a>
     </div>
-    <nav class="footer-nav" aria-label="Навигация в подвале"><a href="/">Главная</a><a href="/course/">Дисциплина</a><a href="/seminars/">Семинары</a><a href="/method/">Методика</a><a href="/artifacts/">Артефакты</a><a href="/reading/">Литература</a></nav>
-    <dl class="footer-meta">
+    <nav class="foot-nav" aria-label="Навигация в подвале"><a href="/">Главная</a><a href="/seminars/">Кейсы</a><a href="/course/">Дисциплина</a><a href="/method/">Методика</a><a href="/artifacts/">Артефакты</a><a href="/reading/">Литература</a></nav>
+    <dl class="foot-meta">
       <div><dt>Подразделение</dt><dd>[Факультет / кафедра]</dd></div>
       <div><dt>Семестр</dt><dd>Один семестр · 8 недель</dd></div>
-      <div><dt>Аудитория</dt><dd>30 студентов</dd></div>
-      <div><dt>Контактная работа</dt><dd>8 семинаров × 90 минут</dd></div>
     </dl>
-    <p class="colophon">Карты: Natural Earth 110m, проекция Робинсона. Шрифты: Golos Text, Literata, IBM Plex Mono. Собрано из content.json.</p>
+    <p class="colophon">Карты: Natural Earth 110m, проекция Робинсона. Шрифты: Golos Text, Literata, IBM Plex Mono. Тексты и числа собраны из content.json.</p>
   </div>
 </footer>
 <script src="/assets/app.js" defer></script>
