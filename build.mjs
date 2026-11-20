@@ -1087,7 +1087,7 @@ function literaturePage() {
 
   return layout({
     title: `Литература · ${meta.title}`,
-    description: `Все ${readingCount} источника курса «${meta.title}» по кейсам, с аннотациями и пометкой о доступе.`,
+    description: `Все ${readingCount} источника и 10 открытых статей курса «${meta.title}» по кейсам, с аннотациями, авторами и пометкой о доступе.`,
     active: "literature",
     body,
     pagePath: "reading/",
