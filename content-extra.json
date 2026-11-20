@@ -3,54 +3,85 @@
     {
       "seminar": 1,
       "kind": "case",
-      "displayAuthors": "Анастасия Забелла",
-      "initials": "АЗ",
-      "authorBio": "Исследует китайскую инфраструктурную политику в Восточной Африке.",
-      "title": "Джибути как важный логистический хаб Китая в Восточной Африке в рамках инициативы «Один пояс - Один путь»",
-      "year": "2022",
-      "journal": "Постсоветский материк",
-      "link": "https://cyberleninka.ru/article/n/dzhibuti-kak-vazhnyy-logisticheskiy-hab-kitaya-v-vostochnoy-afrike-v-ramkah-initsiativy-odin-poyas-odin-put",
-      "annotation": "Разбирает, зачем Китаю порты и военная точка в Джибути и как проект «Один пояс - Один путь» меняет присутствие в Индийском океане. Полезна как вторая рамка к спору о трёх державах."
+      "source": "КиберЛенинка",
+      "displayAuthors": "Ольга Москаленко и соавторы",
+      "initials": "ОМ",
+      "authorBio": "Авторы работы о судьбе Конвенции Монтрё после 2022 года.",
+      "title": "Конвенция Монтрё после начала СВО: статус-кво или денонсация",
+      "year": "2023",
+      "journal": "Вестник РУДН. Серия: Международные отношения",
+      "link": "https://cyberleninka.ru/article/n/konventsiya-montryo-posle-nachala-svo-status-kvo-ili-denonsatsiya-diskurs-mezhdunarodnyh-aktorov-i-vozmozhnye-geopoliticheskie",
+      "annotation": "Показывает, как после 2022 года изменился разговор о Монтрё и какие сценарии обсуждают акторы. Хорошо ложится к дебрифингу."
     },
     {
       "seminar": 2,
       "kind": "case",
-      "displayAuthors": "Павел Катюха, Николай Бодров, Никита Дурнев",
-      "initials": "ПК",
-      "authorBio": "Авторы работы о транспортной логистике и уязвимости энергетических коридоров.",
-      "title": "Трансформация мировой транспортно-логистической инфраструктуры в условиях ограничения судоходства через Ормузский пролив",
-      "year": "2026",
-      "journal": "Инновации и инвестиции",
-      "link": "https://cyberleninka.ru/article/n/transformatsiya-mirovoy-transportno-logisticheskoy-infrastruktury-v-usloviyah-ogranicheniya-sudohodstva-cherez-ormuzskiy-proliv",
-      "annotation": "Считает последствия перекрытия Ормуза для нефтяного рынка и разбирает альтернативные маршруты. Хорошо ложится к расчёту издержек на семинаре."
+      "source": "КиберЛенинка",
+      "displayAuthors": "Джамиля Джунусова",
+      "initials": "ДД",
+      "authorBio": "Юрист-международник; пишет о режиме континентального шельфа.",
+      "title": "Современный международно-правовой режим континентального шельфа",
+      "year": "2007",
+      "journal": "Нефтегазовые технологии и экологическая безопасность",
+      "link": "https://cyberleninka.ru/article/n/sovremennyy-mezhdunarodno-pravovoy-rezhim-kontinentalnogo-shelfa",
+      "annotation": "Сравнивает Женевскую конвенцию 1958 года и UNCLOS 1982 года. Полезно, чтобы увидеть, как менялся режим шельфа."
     },
     {
       "seminar": 3,
       "kind": "case",
-      "displayAuthors": "Александр Сквозников",
-      "initials": "АС",
-      "authorBio": "Правовед; пишет о правосубъектности непризнанных государств.",
-      "title": "Феномен непризнанных и частично признанных государств и особенности их правосубъектности",
-      "year": "2011",
-      "journal": "Вестник Самарской гуманитарной академии. Серия: Право",
-      "link": "https://cyberleninka.ru/article/n/fenomen-nepriznannyh-i-chastichno-priznannyh-gosudarstv-i-osobennosti-ih-pravosubektnosti",
-      "annotation": "Юридический разбор статуса непризнанных государств и конфликта между самоопределением и территориальной целостностью. Даёт язык для матрицы сравнения."
+      "source": "AJOL",
+      "displayAuthors": "M. O. Bonchuk",
+      "initials": "MB",
+      "authorBio": "Исследователь африканских границ; автор работы о решении Международного суда по Бакасси.",
+      "title": "The ICJ Judgment over the Bakassi Peninsula: A Model in the Resolution of African Boundary Disputes",
+      "year": "2014",
+      "journal": "Lwati: A Journal of Contemporary Research",
+      "link": "https://www.ajol.info/index.php/lwati/article/view/119771",
+      "annotation": "Разбирает решение как модель для африканских границ и связывает его с нефтью, этническими группами и соглашением Гринтри."
     },
     {
       "seminar": 4,
       "kind": "case",
-      "displayAuthors": "Татьяна Шильченко, Александр Зимовец",
-      "initials": "ТШ",
-      "authorBio": "Экономисты; исследуют редкоземельные металлы как инструмент геополитики.",
-      "title": "Редкоземельные металлы как инструмент геополитики: вызовы и возможности для России",
-      "year": "2025",
-      "journal": "Экономика, предпринимательство и право",
-      "link": "https://cyberleninka.ru/article/n/redkozemelnye-metally-kak-instrument-geopolitiki-vyzovy-i-vozmozhnosti-dlya-rossii",
-      "annotation": "Показывает, как добыча и переработка редкозёмов становятся инструментом политики. Полезно для спора о том, где именно в цепочке находится рычаг."
+      "source": "КиберЛенинка",
+      "displayAuthors": "Анастасия Забелла",
+      "initials": "АЗ",
+      "authorBio": "Исследует китайскую инфраструктурную политику в Восточной Африке.",
+      "title": "Джибути как важный логистический хаб Китая в Восточной Африке",
+      "year": "2022",
+      "journal": "Постсоветский материк",
+      "link": "https://cyberleninka.ru/article/n/dzhibuti-kak-vazhnyy-logisticheskiy-hab-kitaya-v-vostochnoy-afrike-v-ramkah-initsiativy-odin-poyas-odin-put",
+      "annotation": "Разбирает, зачем Китаю порты и военная точка в Джибути и как проект «Один пояс - Один путь» меняет присутствие в Индийском океане."
     },
     {
       "seminar": 5,
       "kind": "case",
+      "source": "КиберЛенинка",
+      "displayAuthors": "Вера Пушкарева",
+      "initials": "ВП",
+      "authorBio": "Политолог; исследует конфликт вокруг плотины Возрождения.",
+      "title": "Плотина Возрождения Эфиопии как фактор напряжённости на Африканском Роге",
+      "year": "2025",
+      "journal": "Вестник Удмуртского университета",
+      "link": "https://cyberleninka.ru/article/n/plotina-vozrozhdeniya-efiopii-kak-faktor-napryazhennosti-na-afrikanskom-roge",
+      "annotation": "Разбирает эскалацию после 2011 года и позиции Египта и Эфиопии. Хорошо ложится к водным переговорам."
+    },
+    {
+      "seminar": 6,
+      "kind": "case",
+      "source": "Nature",
+      "displayAuthors": "Alexander B. Kirshen и соавторы",
+      "initials": "AK",
+      "authorBio": "Гидрологи; изучают пресную воду в литиевых бассейнах Анд.",
+      "title": "Freshwater inflows to closed basins of the Andean plateau in Chile, Argentina, and Bolivia",
+      "year": "2025",
+      "journal": "Communications Earth & Environment",
+      "link": "https://www.nature.com/articles/s43247-025-02130-6",
+      "annotation": "Гидрология замкнутых бассейнов Атакамы, Уюни и Оларуса. Объясняет, почему вода — не фон, а часть литиевой экономики."
+    },
+    {
+      "seminar": 7,
+      "kind": "case",
+      "source": "КиберЛенинка",
       "displayAuthors": "С. Н. Каменев",
       "initials": "СК",
       "authorBio": "Востоковед; исследует Китайско-пакистанский экономический коридор.",
@@ -58,47 +89,25 @@
       "year": "2018",
       "journal": "Восточная аналитика",
       "link": "https://cyberleninka.ru/article/n/kitaysko-pakistanskiy-ekonomicheskiy-koridor-i-voprosy-regionalnoy-bezopasnosti",
-      "annotation": "Разбирает КПЭК и модернизацию Гвадара как геостратегический проект. Даёт контекст для защиты и атаки на портовую модель."
-    },
-    {
-      "seminar": 6,
-      "kind": "case",
-      "displayAuthors": "Галина Шинкарецкая",
-      "initials": "ГШ",
-      "authorBio": "Юрист-международник; работает с правом моря и защитой населения затопляемых территорий.",
-      "title": "Повышение уровня Мирового океана и защита населения угрожаемых районов",
-      "year": "2024",
-      "journal": "Труды Института государства и права РАН",
-      "link": "https://cyberleninka.ru/article/n/povyshenie-urovnya-mirovogo-okeana-i-zaschita-naseleniya-ugrozhaemyh-rayonov",
-      "annotation": "Ставит вопрос о правах населения затопляемых территорий и о пробеле в международном праве. Прямо к модельному суду."
-    },
-    {
-      "seminar": 7,
-      "kind": "case",
-      "displayAuthors": "Василий Кириленко",
-      "initials": "ВК",
-      "authorBio": "Исследует информационное пространство как геополитическую категорию.",
-      "title": "Информационное пространство как категория геополитики",
-      "year": "2012",
-      "journal": "Каспийский регион: политика, экономика, культура",
-      "link": "https://cyberleninka.ru/article/n/informatsionnoe-prostranstvo-kak-kategoriya-geopolitiki",
-      "annotation": "Раскрывает информационное пространство как геополитическую категорию. Полезно как рамка к разговору о кабелях, данных и юрисдикциях."
+      "annotation": "Разбирает CPEC и модернизацию Гвадара как геостратегический проект. Полезно для атаки на выводы."
     },
     {
       "seminar": 8,
       "kind": "case",
-      "displayAuthors": "О. К. Ямашкина",
-      "initials": "ОЯ",
-      "authorBio": "Педагог; пишет о портфолио как методе оценивания.",
-      "title": "Портфолио как метод оценивания образовательных достижений учащихся",
-      "year": "2008",
-      "journal": "Психология и педагогика: методика и проблемы практического применения",
-      "link": "https://cyberleninka.ru/article/n/portfolio-kak-metod-otsenivaniya-obrazovatelnyh-dostizheniy-uchaschihsya",
-      "annotation": "Объясняет портфолио как процесс отбора, анализа и рефлексии, а не папку файлов. Опора для финальной сборки."
+      "source": "КиберЛенинка",
+      "displayAuthors": "Е. Е. Николина",
+      "initials": "ЕН",
+      "authorBio": "Исследовательница морских споров; автор работы о Южно-Китайском море.",
+      "title": "Территориальные споры в Южно-Китайском море: случится ли конфликт и как этого не допустить?",
+      "year": "2020",
+      "journal": "StudNet",
+      "link": "https://cyberleninka.ru/article/n/territorialnye-spory-v-yuzhno-kitayskom-more-sluchitsya-li-konflikt-i-kak-etogo-ne-dopustit",
+      "annotation": "Обзор спора и сценариев. Полезна как вход, но проверяйте даты и позиции по первичным документам."
     },
     {
       "seminar": 0,
       "kind": "method",
+      "source": "КиберЛенинка",
       "displayAuthors": "Мария Власова",
       "initials": "МВ",
       "authorBio": "Исследовательница качественных методов; автор работы о кейс-стади в международных отношениях.",
@@ -111,10 +120,11 @@
     {
       "seminar": 0,
       "kind": "method",
-      "displayAuthors": "Елена Руденко, Эмма Огородникова, Евгения Потехина",
+      "source": "КиберЛенинка",
+      "displayAuthors": "Елена Руденко и соавторы",
       "initials": "ЕР",
       "authorBio": "Педагоги; применяют цикл Колба в цифровой образовательной среде.",
-      "title": "Цикл обучения Колба как технология развития метапредметных компетенций студентов-медиков в цифровой иноязычной среде",
+      "title": "Цикл обучения Колба как технология развития метапредметных компетенций студентов-медиков",
       "year": "2026",
       "journal": "Концепт",
       "link": "https://cyberleninka.ru/article/n/tsikl-obucheniya-kolba-kak-tehnologiya-razvitiya-metapredmetnyh-kompetentsiy-studentov-medikov-v-tsifrovoy-inoyazychnoy-srede",
@@ -122,17 +132,41 @@
     }
   ],
   "people": {
-    "John Agnew": {
-      "initials": "JA",
-      "bio": "Политический географ, профессор Калифорнийского университета в Лос-Анджелесе."
+    "ООН": {
+      "initials": "UN",
+      "bio": "Организация Объединённых Наций; источник конвенций и данных."
     },
-    "Nina Caspersen": {
-      "initials": "NC",
-      "bio": "Политолог, Университет Йорка; исследовательница непризнанных государств."
+    "CLCS": {
+      "initials": "CL",
+      "bio": "Комиссия по границам континентального шельфа."
     },
-    "Martin Lewis": {
-      "initials": "ML",
-      "bio": "Географ, автор блога Geocurrents."
+    "International Court of Justice": {
+      "initials": "ICJ",
+      "bio": "Международный суд ООН, Гаага."
+    },
+    "UN Digital Library": {
+      "initials": "UN",
+      "bio": "Цифровая библиотека документов ООН."
+    },
+    "IISS": {
+      "initials": "II",
+      "bio": "Международный институт стратегических исследований, Лондон."
+    },
+    "World Bank": {
+      "initials": "WB",
+      "bio": "Всемирный банк; данные и методики оценки проектов."
+    },
+    "PCA": {
+      "initials": "PCA",
+      "bio": "Постоянная палата третейского суда, Гаага."
+    },
+    "CPEC Authority": {
+      "initials": "CP",
+      "bio": "Управление Китайско-пакистанского экономического коридора."
+    },
+    "Turkish MFA": {
+      "initials": "TR",
+      "bio": "Министерство иностранных дел Турции."
     }
   }
 }

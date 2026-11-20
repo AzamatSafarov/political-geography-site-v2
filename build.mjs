@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   loadRings, worldLandPath, horizonPath, worldGraticule, regionalPlate,
-  normalizeBbox, fitFrame, miniPlate, worldMarkers, formatBounds, project,
+  normalizeBbox, fitFrame, miniPlate, worldMarkers, formatBounds,
   WORLD_H, WORLD_W,
 } from "./src/map.mjs";
 
@@ -23,7 +23,6 @@ const shortFormat = new Map(methodology.formats.map((f) => [f.name, f.short]));
 const readingCount = seminars.reduce((n, s) => n + s.reading.length, 0);
 const caseArticles = extra.articles.filter((a) => a.kind === "case");
 const methodArticles = extra.articles.filter((a) => a.kind === "method");
-const articleFor = (n) => caseArticles.find((a) => a.seminar === n);
 const people = extra.people || {};
 
 // ---------------------------------------------------------------- visual system
@@ -59,13 +58,13 @@ const mark = (cls = "mark") => `<svg class="${cls}" viewBox="0 0 40 40" aria-hid
 // a side. These marks are drawn once and reused on cards, the route and the
 // case header.
 const SIGILS = {
-  1: '<path d="M16 5l4 7h-8z"/><circle cx="16" cy="18" r="2.5"/><path d="M16 20.5V27M9 27h14M7 12l6 3M25 12l-6 3"/>',
-  2: '<path d="M6 4c4 4 4 9 2 13s-2 8 0 11M26 4c-4 4-4 9-2 13s2 8 0 11"/><path d="M13 16h6"/>',
-  3: '<rect x="7" y="7" width="18" height="18" rx="2" stroke-dasharray="3 3"/><path d="M13 13h6v6h-6z"/>',
-  4: '<path d="M16 4l9 6v12l-9 6-9-6V10z"/><path d="M16 4v24M7 10l9 6 9-6"/>',
-  5: '<path d="M7 27V7h13M7 12h13M13 12v8M20 12l4 4v11"/><path d="M5 27h22"/>',
-  6: '<circle cx="22" cy="9" r="4"/><path d="M4 20c3-3 6-3 9 0s6 3 9 0 6-3 9 0"/><path d="M4 26c3-3 6-3 9 0s6 3 9 0 6-3 9 0"/>',
-  7: '<path d="M4 24c6 0 6-14 12-14s6 14 12 14"/><circle cx="4" cy="24" r="2"/><circle cx="16" cy="10" r="2"/><circle cx="28" cy="24" r="2"/>',
+  1: '<path d="M6 4c4 4 4 9 2 13s-2 8 0 11M26 4c-4 4-4 9-2 13s2 8 0 11"/><path d="M13 16h6"/>',
+  2: '<path d="M6 22l6-12 4 6 3-4 7 10z"/><path d="M3 22h26M11 22l3 6 4-6M16 10v6"/>',
+  3: '<path d="M4 6h10c6 0 6 8 12 8v12H8c6-4 6-8 2-10S4 12 4 6z"/><path d="M4 6v20"/>',
+  4: '<path d="M16 5l4 7h-8z"/><circle cx="16" cy="18" r="2.5"/><path d="M16 20.5V27M9 27h14M7 12l6 3M25 12l-6 3"/>',
+  5: '<path d="M5 24h22M8 24V12h5v12M19 24V12h5v12"/><path d="M4 16c4-3 8-3 12 0s8 3 12 0"/>',
+  6: '<path d="M16 4l9 6v12l-9 6-9-6V10z"/><path d="M16 4v24M7 10l9 6 9-6"/>',
+  7: '<path d="M7 27V7h13M7 12h13M13 12v8M20 12l4 4v11"/><path d="M5 27h22"/>',
   8: '<rect x="5" y="7" width="9" height="9"/><rect x="18" y="7" width="9" height="9"/><rect x="5" y="18" width="9" height="9"/><rect x="18" y="18" width="9" height="9"/>',
 };
 
@@ -92,7 +91,7 @@ function personLine(name, initials, bio) {
 function articleCard(a, accent = null, wide = false) {
   const color = accent || (a.seminar ? theme(a.seminar).accent : PAGE_ACCENT.methodology);
   return `<article class="article-card${wide ? " article-card--wide" : ""}" style="--accent:${color}">
-  <span class="article-band"><span>${a.kind === "method" ? "К методике" : "Статья к кейсу"}</span><span>КиберЛенинка</span></span>
+  <span class="article-band"><span>${a.kind === "method" ? "К методике" : "Статья к кейсу"}</span><span>${e(a.source || "КиберЛенинка")}</span></span>
   <h3><a href="${e(a.link)}" target="_blank" rel="noopener">${e(a.title)}</a></h3>
   <p class="article-meta">${e(a.displayAuthors)} · ${e(a.journal)} · ${e(a.year)}</p>
   <p class="article-ann">${e(a.annotation)}</p>
@@ -103,16 +102,9 @@ function articleCard(a, accent = null, wide = false) {
 
 // ---------------------------------------------------------------- maps
 
-const TAG_SIDE = { 1: "dl", 2: "ul", 3: "r", 4: "l", 5: "dr", 6: "r", 7: "d", 8: "ur" };
+const TAG_SIDE = { 1: "dl", 2: "dr", 3: "r", 4: "l", 5: "dr", 6: "r", 7: "d", 8: "ur" };
 
 const thumbData = new Map(seminars.map((s) => {
-  if (s.n === seminars.length) {
-    const p = project(s.marker[0], s.marker[1]);
-    return [s.n, {
-      href: "#world-land", viewBox: `0 0 ${WORLD_W} ${WORLD_H.toFixed(2)}`,
-      x: 0, y: 0, w: WORLD_W, h: WORLD_H, cx: p.x, cy: p.y, r: WORLD_W * 0.007,
-    }];
-  }
   const { bbox } = normalizeBbox(s);
   const m = miniPlate(rings, fitFrame(bbox, s.marker).bbox, s.marker);
   return [s.n, {
@@ -123,7 +115,7 @@ const thumbData = new Map(seminars.map((s) => {
 }));
 
 function mapSprite() {
-  const symbols = seminars.filter((s) => s.n !== seminars.length).map((s) => {
+  const symbols = seminars.map((s) => {
     const { bbox } = normalizeBbox(s);
     const m = miniPlate(rings, fitFrame(bbox, s.marker).bbox, s.marker);
     return `<symbol id="thumb-${pad(s.n)}" viewBox="${m.viewBox}" preserveAspectRatio="xMidYMid meet"><path d="${m.land}"/></symbol>`;
@@ -168,21 +160,20 @@ function regionalFigure(s, opts = {}) {
   const t = theme(s.n);
 
   let callouts = "";
-  if (s.n === 1) {
+  if (s.actors && s.actors.length) {
     const [minX, minY, vw, vh] = p.viewBox.split(" ").map(Number);
     const mx = minX + (p.marker.x / 100) * vw;
     const my = minY + (p.marker.y / 100) * vh;
-    const actors = [
-      ["Китай", 18, 26],
-      ["США", 62, 20],
-      ["Франция", 24, 74],
-    ];
+    const spots = s.actors.length > 3
+      ? [[18, 26], [62, 20], [22, 72], [78, 38], [72, 80]]
+      : [[18, 26], [62, 20], [24, 74]];
+    const actors = s.actors.map((name, i) => [name, ...spots[i % spots.length]]);
     const lines = actors.map(([, x, y]) => {
       const ax = minX + (x / 100) * vw;
       const ay = minY + (y / 100) * vh;
       return `<line x1="${mx.toFixed(1)}" y1="${my.toFixed(1)}" x2="${ax.toFixed(1)}" y2="${ay.toFixed(1)}"/>`;
     }).join("");
-    const chips = actors.map(([name, x, y]) => `<span class="actor" style=\"left:${x}%;top:${y}%\"><i></i>${name}</span>`).join("");
+    const chips = actors.map(([name, x, y]) => `<span class="actor" style=\"left:${x}%;top:${y}%\"><i></i>${e(name)}</span>`).join("");
     callouts = `<svg class="callout-lines" viewBox="${p.viewBox}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">${lines}</svg>${chips}`;
   }
 
@@ -345,13 +336,14 @@ function accessBadge(r) {
 
 function sourceCard(r, i) {
   const person = people[r.author];
+  const isArticle = caseArticles.some((a) => a.link === r.link);
   return `<article class="source">
   <span class="source-n">${pad(i + 1)}</span>
   <div class="source-cite">
     <h3>${e(r.author)}</h3>
     <p class="source-title">${e(r.title)}</p>
     <p class="source-year">${e(r.year)}</p>
-    <span class="source-access">${accessBadge(r)}</span>
+    <span class="source-access">${accessBadge(r)}${isArticle ? '<span class="src-kind">Статья</span>' : ""}</span>
     ${person ? personLine(r.author, person.initials, person.bio) : ""}
   </div>
   <div class="source-body">
@@ -400,20 +392,20 @@ function pager(s, root) {
 
 // ---------------------------------------------------------------- format glyphs
 
-const FORMAT_KEYS = ["dispute", "simulation", "jigsaw", "negotiation", "redteam", "court", "sprint", "exhibition"];
+const FORMAT_KEYS = ["passage", "shelf", "court", "bases", "water", "lithium", "corridor", "sea"];
 
 function formatGlyph(key) {
   const paths = {
-    dispute: '<path d="M11 18a13 13 0 0 1 21-4"/><path d="M37 30a13 13 0 0 1-21 4"/><path d="M32 8l1 6-6-1"/><path d="M16 40l-1-6 6 1"/>',
-    simulation: '<circle cx="24" cy="24" r="3"/><circle cx="24" cy="10" r="2.5"/><circle cx="37" cy="18" r="2.5"/><circle cx="33" cy="35" r="2.5"/><circle cx="15" cy="35" r="2.5"/><circle cx="11" cy="18" r="2.5"/><path d="M24 13v8M34 20l-7 3M30 33l-4-6M18 33l3-6M14 20l7 3"/>',
-    jigsaw: '<rect x="8" y="9" width="14" height="14"/><rect x="26" y="9" width="14" height="14"/><rect x="8" y="27" width="14" height="14"/><path d="M26 27h14v14H26"/><path d="M22 16h4M22 34h4M15 23v4M33 23v4"/>',
-    negotiation: '<ellipse cx="24" cy="26" rx="13" ry="7"/><circle cx="24" cy="10" r="3"/><circle cx="10" cy="19" r="3"/><circle cx="38" cy="19" r="3"/><circle cx="15" cy="40" r="3"/><circle cx="33" cy="40" r="3"/><path d="M24 13v6M13 21l5 3M35 21l-5 3M17 37l4-4M31 37l-4-4"/>',
-    redteam: '<path d="M24 6l14 5v11c0 9-6 15-14 20-8-5-14-11-14-20V11z"/><path d="M12 16l8 6M36 16l-8 6"/><path d="M9 12l5 1-1 5M39 12l-5 1 1 5"/>',
+    passage: '<path d="M8 6c4 5 4 11 2 16s-2 11 0 16M40 6c-4 5-4 11-2 16s2 11 0 16"/><circle cx="24" cy="24" r="4"/><path d="M15 24h5M28 24h5"/>',
+    shelf: '<path d="M6 14h14l8 8h14"/><path d="M6 24h18l8-8"/><path d="M6 34h12l10-8"/><circle cx="24" cy="24" r="2"/>',
     court: '<path d="M24 6L8 15h32z"/><path d="M8 15v3h32v-3"/><path d="M13 21v14M24 21v14M35 21v14"/><path d="M9 39h30"/>',
-    sprint: '<circle cx="9" cy="24" r="2.5"/><circle cx="22" cy="24" r="2.5"/><circle cx="35" cy="24" r="2.5"/><path d="M12 24h7M25 24h7"/><path d="M30 24l5-8M30 24l5 8"/><path d="M35 10v8h8"/>',
-    exhibition: '<path d="M7 12h14v12H7zM27 12h14v12H27zM17 30h14v11H17z"/><path d="M11 24v3M37 24v3M21 30v-3M27 30v-3M24 41v-4"/>',
+    bases: '<path d="M24 6l8 5v9c0 7-4 12-8 16-4-4-8-9-8-16V11z"/><circle cx="24" cy="18" r="3"/><path d="M24 21v7"/>',
+    water: '<path d="M6 24h30M10 30V16h6v14M30 30V16h6v14"/><path d="M4 38c4-3 8-3 12 0s8 3 12 0 8-3 12 0"/>',
+    lithium: '<path d="M24 6l12 8v16l-12 8-12-8V14z"/><path d="M24 6v32M12 14l12 8 12-8"/>',
+    corridor: '<circle cx="8" cy="30" r="3"/><circle cx="24" cy="20" r="3"/><circle cx="40" cy="30" r="3"/><path d="M11 29l10-7M27 21l10 7"/><path d="M8 38h32"/>',
+    sea: '<path d="M4 16c4-3 8-3 12 0s8 3 12 0 8-3 12 0"/><path d="M4 26c4-3 8-3 12 0s8 3 12 0 8-3 12 0"/><path d="M4 36c4-3 8-3 12 0s8 3 12 0 8-3 12 0"/>',
   };
-  return `<svg class="glyph" viewBox="0 0 48 48" aria-hidden="true" focusable="false">${paths[key] || paths.dispute}</svg>`;
+  return `<svg class="glyph" viewBox="0 0 48 48" aria-hidden="true" focusable="false">${paths[key] || paths.passage}</svg>`;
 }
 
 // ---------------------------------------------------------------- runner
@@ -463,7 +455,7 @@ function runnerDialog(s) {
 
 // ---------------------------------------------------------------- route
 
-const ROUTE_LABELS = ["Интерес", "Уязвимость", "Признание", "Цепочка", "Инфраструктура", "Право", "Поток", "Синтез"];
+const ROUTE_LABELS = ["Проход", "Шельф", "Граница", "База", "Вода", "Ресурс", "Коридор", "Море"];
 
 function routeSection() {
   const stops = seminars.map((s) => `<li>
@@ -668,7 +660,7 @@ function seminarPage(s) {
     return `<span style="--w:${(w / 90) * 100}%;--o:${(a / 90) * 100}%" title="${e(item.t)} · ${e(item.label)}"></span>`;
   }).join("");
 
-  const tree = s.artifact.tree.map((line) => {
+  const tree = s.artifact.contents.map((line) => {
     const m = line.match(/^([^—]+)—\s*(.*)$/);
     const file = m ? m[1].trim() : line;
     const desc = m ? m[2] : "";
@@ -677,9 +669,8 @@ function seminarPage(s) {
   const criteria = s.artifact.criteria.map((c) => `<li>${e(c)}</li>`).join("");
   const before = s.before.map((b) => `<li>${e(b)}</li>`).join("");
   const checks = qaList(s.check, true);
-  const isCorpus = s.n === seminars.length;
 
-  const body = `${isCorpus ? mapSprite() : ""}
+  const body = `
 <header class="case-hero" style="--accent:${t.accent};--deep:${t.deep};--soft:${t.soft}">
   <div class="wrap case-hero-grid">
     <div class="case-hero-copy">
@@ -694,11 +685,11 @@ function seminarPage(s) {
         <a class="btn btn--ghost-light" href="#reading">Источники</a>
       </div>
     </div>
-    <div class="case-hero-map">${isCorpus ? worldStage("/", s.n) : regionalFigure(s)}</div>
+    <div class="case-hero-map">${regionalFigure(s)}</div>
   </div>
   <div class="wrap case-facts">
     <div><span>Место</span><b>${e(s.place)}</b></div>
-    <div><span>${isCorpus ? "Схема" : "Координаты"}</span><b>${e(s.coords)}</b></div>
+    <div><span>Координаты</span><b>${e(s.coords)}</b></div>
     <div><span>Формат</span><b>${e(s.format)}</b></div>
     <div><span>Механизм</span><b>${mechanismChain(s.mechanism, "chain chain--light")}</b></div>
   </div>
@@ -707,9 +698,14 @@ function seminarPage(s) {
 <nav class="case-subnav" aria-label="Разделы кейса">
   <div class="wrap">
     <a href="#question">Вопрос</a>
+    <a href="#treaty">Договор</a>
+    <a href="#chronology">Хронология</a>
+    <a href="#maps">Карты</a>
+    <a href="#glossary">Термины</a>
     <a href="#timeline">90 минут</a>
     <a href="#artifact">Артефакт</a>
-    <a href="#check">Проверка</a>
+    <a href="#diplo">Практикум</a>
+    <a href="#reflection">Рефлексия</a>
     <a href="#reading">Источники</a>
     <button class="teacher-only" type="button" data-runner>Таймер</button>
   </div>
@@ -725,6 +721,41 @@ function seminarPage(s) {
       <p class="eyebrow">Что закрепляем</p>
       <ol>${outcomes}</ol>
     </div>
+  </div>
+</section>
+
+<section class="band band--tint" id="treaty">
+  <div class="wrap">
+    ${secHead("02 · Договор", "На чём держится спор", "Один документ, который задаёт язык кейса.")}
+    <div class="treaty-card">
+      <div class="treaty-year">${e(s.treaty.year)}</div>
+      <div class="treaty-main">
+        <h3>${e(s.treaty.name)}</h3>
+        <p>${e(s.treaty.note)}</p>
+        ${s.treaty.link ? `<a class="article-link" href="${e(s.treaty.link)}" target="_blank" rel="noopener">Открыть документ <span aria-hidden="true">↗</span></a>` : `<span class="src-lib">Текст не опубликован</span>`}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="chronology">
+  <div class="wrap">
+    ${secHead("03 · Хронология", "Как развивался кейс", "Даты, которые меняют рамку спора.")}
+    <ol class="date-track">${s.dates.map((d) => `<li><span>${e(d[0])}</span><b>${e(d[1])}</b></li>`).join("")}</ol>
+  </div>
+</section>
+
+<section class="band band--tint" id="maps">
+  <div class="wrap">
+    ${secHead("04 · Карты", "Карты одного вопроса", "Смотрите не на цвет, а на то, что карта показывает и что скрывает.")}
+    <ol class="map-grid">${s.maps.map((m, i) => `<li><span class="map-n">${pad(i + 1)}</span><h3>${e(m.name)}</h3><p>${e(m.task)}</p></li>`).join("")}</ol>
+  </div>
+</section>
+
+<section class="band" id="glossary">
+  <div class="wrap">
+    ${secHead("05 · Глоссарий", "Термины кейса", "Определения нужно применить в видео, гиде и рефлексии.")}
+    <dl class="glossary-grid">${s.glossary.map((g) => `<div class="term"><dt>${e(g.term)}</dt><dd>${e(g.definition)}</dd></div>`).join("")}</dl>
   </div>
 </section>
 
@@ -747,7 +778,7 @@ function seminarPage(s) {
 
 <section class="band" id="timeline">
   <div class="wrap">
-    ${secHead("02 · 90 минут", "Таймлайн", "Семь-восемь шагов, каждый со своей задачей.")}
+    ${secHead("06 · 90 минут", "Таймлайн", "Восемь шагов, каждый со своей задачей.")}
     <div class="ruler" aria-hidden="true">${segs}</div>
     <p class="ruler-scale" aria-hidden="true"><span>0</span><span>30</span><span>60</span><span>90</span></p>
     <ol class="timeline">${timeline}</ol>
@@ -756,15 +787,15 @@ function seminarPage(s) {
 
 <section class="band band--ink" id="artifact">
   <div class="wrap">
-    <p class="eyebrow eyebrow--warm">03 · Артефакт</p>
+    <p class="eyebrow eyebrow--warm">07 · Артефакт</p>
     <h2 class="artifact-name">${e(s.artifact.name)}</h2>
     <div class="artifact-top">
-      <code>${e(s.artifact.repo)}</code>
-      <span>${e(s.artifact.deadline)}</span>
+      <code>${e(s.artifact.format)}</code>
+      <span>${e(s.artifact.destination)} · ${e(s.artifact.deadline)}</span>
     </div>
     <p class="artifact-brief">${e(s.artifact.brief)}</p>
     <div class="artifact-cols">
-      <div><p class="eyebrow">Дерево файлов</p><ul class="tree">${tree}</ul></div>
+      <div><p class="eyebrow">Что внутри</p><ul class="tree">${tree}</ul></div>
       <div><p class="eyebrow">Критерии</p><ul class="criteria">${criteria}</ul></div>
     </div>
   </div>
@@ -773,11 +804,11 @@ function seminarPage(s) {
 <section class="band band--paper" id="around">
   <div class="wrap around">
     <div>
-      <p class="eyebrow">04 · До семинара</p>
+      <p class="eyebrow">08 · До занятия</p>
       <ol class="numbered">${before}</ol>
     </div>
     <div>
-      <p class="eyebrow">После семинара</p>
+      <p class="eyebrow">После занятия</p>
       <p class="after">${e(s.after)}</p>
     </div>
   </div>
@@ -785,17 +816,40 @@ function seminarPage(s) {
 
 <section class="band band--tint" id="check">
   <div class="wrap">
-    ${secHead("05 · Проверь себя", "Вопросы к кейсу", "Откройте вопрос и сформулируйте ответ до того, как читать разбор.")}
+    ${secHead("09 · Проверь себя", "Вопросы к кейсу", "Откройте вопрос и сформулируйте ответ до того, как читать разбор.")}
     <div class="qa-list">${checks}</div>
     <p class="student-only mode-note">Ответы открыты в режиме «Преподаватель».</p>
   </div>
 </section>
 
+<section class="band" id="diplo">
+  <div class="wrap">
+    ${secHead("10 · Практикум", "Дипломатический практикум", s.diplo.situation)}
+    <div class="diplo-grid">
+      <div>
+        <p class="eyebrow">Задание</p>
+        <p class="diplo-task">${e(s.diplo.task)}</p>
+        <ol class="diplo-template">${s.diplo.template.map((line, i) => `<li><span>${pad(i + 1)}</span><p>${e(line)}</p></li>`).join("")}</ol>
+      </div>
+      <aside class="avoid-box">
+        <p class="eyebrow">Чего избегать</p>
+        <ul>${s.diplo.avoid.map((line) => `<li>${e(line)}</li>`).join("")}</ul>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="band band--tint" id="reflection">
+  <div class="wrap">
+    ${secHead("11 · Рефлексия", "Онлайн-рефлексия", `Пять вопросов по схеме ${e(s.reflection.schema)}. Ответы идут в reflection.md к видео.`)}
+    <ol class="scamper-list">${s.reflection.prompts.map((p, i) => `<li><span>${pad(i + 1)}</span><p>${e(p)}</p></li>`).join("")}</ol>
+  </div>
+</section>
+
 <section class="band" id="reading">
   <div class="wrap">
-    ${secHead("06 · Источники", "Три источника и статья", "Три источника кейса и одна открытая статья с КиберЛенинки.")}
+    ${secHead("12 · Источники", "Три источника", "Документ, анализ и открытая статья к кейсу.")}
     ${readingBlock(s)}
-    ${articleFor(s.n) ? `<div class="article-feature">${articleCard(articleFor(s.n), t.accent, true)}</div>` : ""}
     <a class="link-arrow" href="/reading/">Вся литература курса <span aria-hidden="true">→</span></a>
   </div>
 </section>
@@ -951,23 +1005,46 @@ function methodologyPage() {
   </div>
 </section>
 
+<section class="band" id="online">
+  <div class="wrap">
+    ${secHead("03 · Дом", e(methodology.online.title), e(methodology.online.text))}
+    <ol class="scamper-list">${methodology.online.prompts.map((p, i) => `<li><span>${pad(i + 1)}</span><p>${e(p)}</p></li>`).join("")}</ol>
+  </div>
+</section>
+
+<section class="band band--tint" id="diplomacy">
+  <div class="wrap">
+    ${secHead("04 · Практикум", e(methodology.diplomacy.title), e(methodology.diplomacy.text))}
+    <div class="diplo-grid">
+      <div>
+        <p class="eyebrow">Шаблон</p>
+        <ol class="diplo-template">${methodology.diplomacy.template.map((line, i) => `<li><span>${pad(i + 1)}</span><p>${e(line)}</p></li>`).join("")}</ol>
+      </div>
+      <aside class="avoid-box">
+        <p class="eyebrow">Чего избегать</p>
+        <ul>${methodology.diplomacy.avoid.map((line) => `<li>${e(line)}</li>`).join("")}</ul>
+      </aside>
+    </div>
+  </div>
+</section>
+
 <section class="band" id="icap">
   <div class="wrap">
-    ${secHead("03 · Шкала", e(methodology.icap.title), e(methodology.icap.text))}
+    ${secHead("05 · Шкала", e(methodology.icap.title), e(methodology.icap.text))}
     <ol class="icap-grid">${levels}</ol>
   </div>
 </section>
 
 <section class="band band--tint" id="formats">
   <div class="wrap">
-    ${secHead("04 · Форматы", "Восемь форматов и где они ломаются")}
+    ${secHead("06 · Форматы", "Восемь форматов и где они ломаются")}
     <ol class="formats">${formats}</ol>
   </div>
 </section>
 
 <section class="band band--ink" id="thirty">
   <div class="wrap group-note">
-    <p class="eyebrow eyebrow--warm">05 · 30 человек</p>
+    <p class="eyebrow eyebrow--warm">07 · 30 человек</p>
     <h2>Одна комната, один преподаватель</h2>
     <p>${e(methodology.group_note)}</p>
   </div>
@@ -975,7 +1052,7 @@ function methodologyPage() {
 
 <section class="band" id="neighbors">
   <div class="wrap">
-    ${secHead("06 · Контекст", e(methodology.neighbors.title), e(methodology.neighbors.intro))}
+    ${secHead("08 · Контекст", e(methodology.neighbors.title), e(methodology.neighbors.intro))}
     <ol class="neighbors">${neighbors}</ol>
   </div>
 </section>`;
@@ -1002,14 +1079,14 @@ function artifactsPage() {
   const slots = seminars.map((s) => {
     const t = theme(s.n);
     return `<a class="slot" href="/seminars/${s.slug}/" style="--accent:${t.accent};--soft:${t.soft}">
-      <span class="slot-top"><span>Слот ${pad(s.n)}</span><code>${e(s.artifact.repo)}</code></span>
+      <span class="slot-top"><span>Слот ${pad(s.n)}</span><code>${e(s.artifact.format)}</code></span>
       <h3>${e(s.artifact.name)}</h3>
       <p>${e(s.title)}</p>
       <span class="slot-state">Слот пуст</span>
     </a>`;
   }).join("");
 
-  const body = `${pageHead({ plate: "Артефакты", label: "8 репозиториев", title: "Артефакт вместо конспекта", lead: e(artifacts_page.lead) })}
+  const body = `${pageHead({ plate: "Артефакты", label: "8 видео и гидов", title: "Артефакт вместо конспекта", lead: e(artifacts_page.lead) })}
 <section class="band band--paper" id="rules">
   <div class="wrap">
     ${secHead("01 · Правила", "Пять правил артефакта")}
@@ -1061,17 +1138,17 @@ function literaturePage() {
     ${readingBlock(s)}
   </section>`).join("");
 
-  const body = `${pageHead({ plate: "Литература", label: `${readingCount} источника и 10 статей`, title: "Что читать к каждому кейсу", lead: "Три источника и открытая статья на каждый кейс. У статей указаны авторы и короткая справка, у книг — пометка о доступе." })}
+  const body = `${pageHead({ plate: "Литература", label: `${readingCount} источника и 10 статей`, title: "Что читать к каждому кейсу", lead: "Три источника на каждый кейс: документ, анализ и открытая статья. У статей указаны авторы и короткая справка, у документов — пометка о доступе." })}
 <section class="band band--paper" id="core">
   <div class="wrap">
-    ${secHead("01 · Основное", "Восемь книг", "Первый источник каждого кейса. Обложки собраны типографикой, без чужих изображений.")}
+    ${secHead("01 · Основное", "Восемь основных источников", "Первый источник каждого кейса. Обложки собраны типографикой, без чужих изображений.")}
     <div class="book-grid">${covers}</div>
   </div>
 </section>
 
 <section class="band band--tint" id="articles">
   <div class="wrap">
-    ${secHead("02 · Статьи", "Открытые статьи", "Восемь статей к кейсам и две про методику. Все доступны на КиберЛенинке.")}
+    ${secHead("02 · Статьи", "Открытые статьи", "Восемь статей к кейсам и две про методику. Все в открытом доступе.")}
     <div class="article-grid">${extra.articles.map((a) => articleCard(a)).join("")}</div>
   </div>
 </section>
