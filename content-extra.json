@@ -1,0 +1,138 @@
+{
+  "articles": [
+    {
+      "seminar": 1,
+      "kind": "case",
+      "displayAuthors": "Анастасия Забелла",
+      "initials": "АЗ",
+      "authorBio": "Исследует китайскую инфраструктурную политику в Восточной Африке.",
+      "title": "Джибути как важный логистический хаб Китая в Восточной Африке в рамках инициативы «Один пояс - Один путь»",
+      "year": "2022",
+      "journal": "Постсоветский материк",
+      "link": "https://cyberleninka.ru/article/n/dzhibuti-kak-vazhnyy-logisticheskiy-hab-kitaya-v-vostochnoy-afrike-v-ramkah-initsiativy-odin-poyas-odin-put",
+      "annotation": "Разбирает, зачем Китаю порты и военная точка в Джибути и как проект «Один пояс - Один путь» меняет присутствие в Индийском океане. Полезна как вторая рамка к спору о трёх державах."
+    },
+    {
+      "seminar": 2,
+      "kind": "case",
+      "displayAuthors": "Павел Катюха, Николай Бодров, Никита Дурнев",
+      "initials": "ПК",
+      "authorBio": "Авторы работы о транспортной логистике и уязвимости энергетических коридоров.",
+      "title": "Трансформация мировой транспортно-логистической инфраструктуры в условиях ограничения судоходства через Ормузский пролив",
+      "year": "2026",
+      "journal": "Инновации и инвестиции",
+      "link": "https://cyberleninka.ru/article/n/transformatsiya-mirovoy-transportno-logisticheskoy-infrastruktury-v-usloviyah-ogranicheniya-sudohodstva-cherez-ormuzskiy-proliv",
+      "annotation": "Считает последствия перекрытия Ормуза для нефтяного рынка и разбирает альтернативные маршруты. Хорошо ложится к расчёту издержек на семинаре."
+    },
+    {
+      "seminar": 3,
+      "kind": "case",
+      "displayAuthors": "Александр Сквозников",
+      "initials": "АС",
+      "authorBio": "Правовед; пишет о правосубъектности непризнанных государств.",
+      "title": "Феномен непризнанных и частично признанных государств и особенности их правосубъектности",
+      "year": "2011",
+      "journal": "Вестник Самарской гуманитарной академии. Серия: Право",
+      "link": "https://cyberleninka.ru/article/n/fenomen-nepriznannyh-i-chastichno-priznannyh-gosudarstv-i-osobennosti-ih-pravosubektnosti",
+      "annotation": "Юридический разбор статуса непризнанных государств и конфликта между самоопределением и территориальной целостностью. Даёт язык для матрицы сравнения."
+    },
+    {
+      "seminar": 4,
+      "kind": "case",
+      "displayAuthors": "Татьяна Шильченко, Александр Зимовец",
+      "initials": "ТШ",
+      "authorBio": "Экономисты; исследуют редкоземельные металлы как инструмент геополитики.",
+      "title": "Редкоземельные металлы как инструмент геополитики: вызовы и возможности для России",
+      "year": "2025",
+      "journal": "Экономика, предпринимательство и право",
+      "link": "https://cyberleninka.ru/article/n/redkozemelnye-metally-kak-instrument-geopolitiki-vyzovy-i-vozmozhnosti-dlya-rossii",
+      "annotation": "Показывает, как добыча и переработка редкозёмов становятся инструментом политики. Полезно для спора о том, где именно в цепочке находится рычаг."
+    },
+    {
+      "seminar": 5,
+      "kind": "case",
+      "displayAuthors": "С. Н. Каменев",
+      "initials": "СК",
+      "authorBio": "Востоковед; исследует Китайско-пакистанский экономический коридор.",
+      "title": "Китайско-пакистанский экономический коридор и вопросы региональной безопасности",
+      "year": "2018",
+      "journal": "Восточная аналитика",
+      "link": "https://cyberleninka.ru/article/n/kitaysko-pakistanskiy-ekonomicheskiy-koridor-i-voprosy-regionalnoy-bezopasnosti",
+      "annotation": "Разбирает КПЭК и модернизацию Гвадара как геостратегический проект. Даёт контекст для защиты и атаки на портовую модель."
+    },
+    {
+      "seminar": 6,
+      "kind": "case",
+      "displayAuthors": "Галина Шинкарецкая",
+      "initials": "ГШ",
+      "authorBio": "Юрист-международник; работает с правом моря и защитой населения затопляемых территорий.",
+      "title": "Повышение уровня Мирового океана и защита населения угрожаемых районов",
+      "year": "2024",
+      "journal": "Труды Института государства и права РАН",
+      "link": "https://cyberleninka.ru/article/n/povyshenie-urovnya-mirovogo-okeana-i-zaschita-naseleniya-ugrozhaemyh-rayonov",
+      "annotation": "Ставит вопрос о правах населения затопляемых территорий и о пробеле в международном праве. Прямо к модельному суду."
+    },
+    {
+      "seminar": 7,
+      "kind": "case",
+      "displayAuthors": "Василий Кириленко",
+      "initials": "ВК",
+      "authorBio": "Исследует информационное пространство как геополитическую категорию.",
+      "title": "Информационное пространство как категория геополитики",
+      "year": "2012",
+      "journal": "Каспийский регион: политика, экономика, культура",
+      "link": "https://cyberleninka.ru/article/n/informatsionnoe-prostranstvo-kak-kategoriya-geopolitiki",
+      "annotation": "Раскрывает информационное пространство как геополитическую категорию. Полезно как рамка к разговору о кабелях, данных и юрисдикциях."
+    },
+    {
+      "seminar": 8,
+      "kind": "case",
+      "displayAuthors": "О. К. Ямашкина",
+      "initials": "ОЯ",
+      "authorBio": "Педагог; пишет о портфолио как методе оценивания.",
+      "title": "Портфолио как метод оценивания образовательных достижений учащихся",
+      "year": "2008",
+      "journal": "Психология и педагогика: методика и проблемы практического применения",
+      "link": "https://cyberleninka.ru/article/n/portfolio-kak-metod-otsenivaniya-obrazovatelnyh-dostizheniy-uchaschihsya",
+      "annotation": "Объясняет портфолио как процесс отбора, анализа и рефлексии, а не папку файлов. Опора для финальной сборки."
+    },
+    {
+      "seminar": 0,
+      "kind": "method",
+      "displayAuthors": "Мария Власова",
+      "initials": "МВ",
+      "authorBio": "Исследовательница качественных методов; автор работы о кейс-стади в международных отношениях.",
+      "title": "Кейс-стади в исследованиях международных отношений: методология и исследовательская практика",
+      "year": "2012",
+      "journal": "Теория и практика общественного развития",
+      "link": "https://cyberleninka.ru/article/n/keys-stadi-v-issledovaniyah-mezhdunarodnyh-otnosheniy-metodologiya-i-issledovatelskaya-praktika",
+      "annotation": "Определяет кейс и кейс-стади, различает виды кейсов и показывает, как метод работает в международных отношениях. Опора для объяснения, почему курс построен на кейсах."
+    },
+    {
+      "seminar": 0,
+      "kind": "method",
+      "displayAuthors": "Елена Руденко, Эмма Огородникова, Евгения Потехина",
+      "initials": "ЕР",
+      "authorBio": "Педагоги; применяют цикл Колба в цифровой образовательной среде.",
+      "title": "Цикл обучения Колба как технология развития метапредметных компетенций студентов-медиков в цифровой иноязычной среде",
+      "year": "2026",
+      "journal": "Концепт",
+      "link": "https://cyberleninka.ru/article/n/tsikl-obucheniya-kolba-kak-tehnologiya-razvitiya-metapredmetnyh-kompetentsiy-studentov-medikov-v-tsifrovoy-inoyazychnoy-srede",
+      "annotation": "Показывает, как цикл Колба применяется в обучении: опыт, рефлексия, концептуализация, эксперимент. Не про политическую географию, но про механику курса."
+    }
+  ],
+  "people": {
+    "John Agnew": {
+      "initials": "JA",
+      "bio": "Политический географ, профессор Калифорнийского университета в Лос-Анджелесе."
+    },
+    "Nina Caspersen": {
+      "initials": "NC",
+      "bio": "Политолог, Университет Йорка; исследовательница непризнанных государств."
+    },
+    "Martin Lewis": {
+      "initials": "ML",
+      "bio": "Географ, автор блога Geocurrents."
+    }
+  }
+}

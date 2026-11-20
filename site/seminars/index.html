@@ -49,6 +49,10 @@
       <button class="chip" type="button" data-filter="dispute" aria-pressed="false">SAC <span>1</span></button><button class="chip" type="button" data-filter="simulation" aria-pressed="false">Симуляция <span>1</span></button><button class="chip" type="button" data-filter="jigsaw" aria-pressed="false">Jigsaw <span>1</span></button><button class="chip" type="button" data-filter="negotiation" aria-pressed="false">Игра <span>1</span></button><button class="chip" type="button" data-filter="redteam" aria-pressed="false">Red team <span>1</span></button><button class="chip" type="button" data-filter="court" aria-pressed="false">Суд <span>1</span></button><button class="chip" type="button" data-filter="sprint" aria-pressed="false">Спринт <span>1</span></button><button class="chip" type="button" data-filter="exhibition" aria-pressed="false">Выставка и рецензирование <span>1</span></button>
     </div>
     <p class="filter-status js-only">Показаны все 8 кейсов</p>
+    <div class="view-switch js-only" role="group" aria-label="Вид списка">
+      <button type="button" data-view="cards" aria-pressed="true">Карточки</button>
+      <button type="button" data-view="table" aria-pressed="false">Таблица</button>
+    </div>
     <div class="case-grid" id="seminar-grid"><a class="case" href="/seminars/01-djibouti/" data-format="dispute" style="--accent:#A63A20;--deep:#6E2413;--soft:#F2D9CF">
   <span class="case-media">
     <svg viewBox="575.8 178.8 101.9 76.7" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
@@ -56,12 +60,14 @@
       <circle class="case-pin" cx="619.0" cy="217.1" r="1.4"></circle>
     </svg>
     <span class="case-num" aria-hidden="true">01</span>
+    <span class="case-sigil" aria-hidden="true"><svg class="sigil" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M16 5l4 7h-8z"/><circle cx="16" cy="18" r="2.5"/><path d="M16 20.5V27M9 27h14M7 12l6 3M25 12l-6 3"/></svg></span>
     <span class="case-place">Джибути</span>
   </span>
   <span class="case-body">
     <span class="case-kicker">Неделя 1 · SAC</span>
     <h3>База в Джибути: три взгляда на одну точку</h3>
     <span class="case-short">Китай, США и Франция платят за присутствие в одной из беднейших стран мира. Разбираем, что именно каждая сторона покупает.</span>
+    <span class="case-chain"><b>Интерес</b><i aria-hidden="true">→</i><b>ставка</b><i aria-hidden="true">→</i><b>издержка</b></span>
     <span class="case-open">Открыть кейс <i aria-hidden="true">→</i></span>
   </span>
 </a>
@@ -72,12 +78,14 @@
       <circle class="case-pin" cx="652.1" cy="169.9" r="3.2"></circle>
     </svg>
     <span class="case-num" aria-hidden="true">02</span>
+    <span class="case-sigil" aria-hidden="true"><svg class="sigil" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M6 4c4 4 4 9 2 13s-2 8 0 11M26 4c-4 4-4 9-2 13s2 8 0 11"/><path d="M13 16h6"/></svg></span>
     <span class="case-place">Ормузский пролив</span>
   </span>
   <span class="case-body">
     <span class="case-kicker">Неделя 2 · Симуляция</span>
     <h3>Горло мира: три пролива и цена зависимости</h3>
     <span class="case-short">Ормуз, Баб-эль-Мандеб, Малакка. Угроза перекрыть пролив звучит постоянно — и почти никогда не исполняется. Разбираемся, почему.</span>
+    <span class="case-chain"><b>Уязвимость</b><i aria-hidden="true">↔</i><b>взаимозависимость</b></span>
     <span class="case-open">Открыть кейс <i aria-hidden="true">→</i></span>
   </span>
 </a>
@@ -88,12 +96,14 @@
       <circle class="case-pin" cx="827.8" cy="179.1" r="5.1"></circle>
     </svg>
     <span class="case-num" aria-hidden="true">03</span>
+    <span class="case-sigil" aria-hidden="true"><svg class="sigil" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect x="7" y="7" width="18" height="18" rx="2" stroke-dasharray="3 3"/><path d="M13 13h6v6h-6z"/></svg></span>
     <span class="case-place">Тайвань · Сомалиленд · Приднестровье</span>
   </span>
   <span class="case-body">
     <span class="case-kicker">Неделя 3 · Jigsaw</span>
     <h3>Непризнанные: суверенитет как практика</h3>
     <span class="case-short">Сомалиленд печатает деньги и проводит выборы тридцать лет. Тайвань признают двенадцать государств. Разбираемся, что делает государство государством.</span>
+    <span class="case-chain"><b>Признание, территория, работающее государство</b></span>
     <span class="case-open">Открыть кейс <i aria-hidden="true">→</i></span>
   </span>
 </a>
@@ -104,12 +114,14 @@
       <circle class="case-pin" cx="314.3" cy="327.5" r="8.4"></circle>
     </svg>
     <span class="case-num" aria-hidden="true">04</span>
+    <span class="case-sigil" aria-hidden="true"><svg class="sigil" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M16 4l9 6v12l-9 6-9-6V10z"/><path d="M16 4v24M7 10l9 6 9-6"/></svg></span>
     <span class="case-place">Атакама · ДР Конго · Китай</span>
   </span>
   <span class="case-body">
     <span class="case-kicker">Неделя 4 · Игра</span>
     <h3>Ресурсный треугольник: литий, кобальт, редкозёмы</h3>
     <span class="case-short">Кто контролирует литий — страна, где он добывается, компания, которая его перерабатывает, или страна, которая его покупает?</span>
+    <span class="case-chain"><b>Цепочка поставок как рычаг</b></span>
     <span class="case-open">Открыть кейс <i aria-hidden="true">→</i></span>
   </span>
 </a>
@@ -120,12 +132,14 @@
       <circle class="case-pin" cx="668.3" cy="174.7" r="2.0"></circle>
     </svg>
     <span class="case-num" aria-hidden="true">05</span>
+    <span class="case-sigil" aria-hidden="true"><svg class="sigil" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M7 27V7h13M7 12h13M13 12v8M20 12l4 4v11"/><path d="M5 27h22"/></svg></span>
     <span class="case-place">Гвадар</span>
   </span>
   <span class="case-body">
     <span class="case-kicker">Неделя 5 · Red team</span>
     <h3>Порт как власть: коридоры, концессии, долг</h3>
     <span class="case-short">Порт, который не приносит прибыли, может быть выгоднее прибыльного. Защищаем проект, который собираются разобрать.</span>
+    <span class="case-chain"><b>Инфраструктура как долгосрочная связка</b></span>
     <span class="case-open">Открыть кейс <i aria-hidden="true">→</i></span>
   </span>
 </a>
@@ -136,12 +150,14 @@
       <circle class="case-pin" cx="535.7" cy="20.0" r="1.4"></circle>
     </svg>
     <span class="case-num" aria-hidden="true">06</span>
+    <span class="case-sigil" aria-hidden="true"><svg class="sigil" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle cx="22" cy="9" r="4"/><path d="M4 20c3-3 6-3 9 0s6 3 9 0 6-3 9 0"/><path d="M4 26c3-3 6-3 9 0s6 3 9 0 6-3 9 0"/></svg></span>
     <span class="case-place">Арктика · Тувалу</span>
   </span>
   <span class="case-body">
     <span class="case-kicker">Неделя 6 · Суд</span>
     <h3>Климат против территории: кто отвечает за тонущее государство</h3>
     <span class="case-short">Если территория исчезает, исчезает ли государство — и кто платит за переселение. Разбираем в модельном суде.</span>
+    <span class="case-chain"><b>Право, время и ответственность</b></span>
     <span class="case-open">Открыть кейс <i aria-hidden="true">→</i></span>
   </span>
 </a>
@@ -152,12 +168,14 @@
       <circle class="case-pin" cx="788.2" cy="249.5" r="4.0"></circle>
     </svg>
     <span class="case-num" aria-hidden="true">07</span>
+    <span class="case-sigil" aria-hidden="true"><svg class="sigil" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M4 24c6 0 6-14 12-14s6 14 12 14"/><circle cx="4" cy="24" r="2"/><circle cx="16" cy="10" r="2"/><circle cx="28" cy="24" r="2"/></svg></span>
     <span class="case-place">Сингапур</span>
   </span>
   <span class="case-body">
     <span class="case-kicker">Неделя 7 · Спринт</span>
     <h3>Кабели, спутники, данные: география без территории</h3>
     <span class="case-short">Границу, которую нельзя увидеть, можно перерезать якорем. Строим карту рисков цифрового потока.</span>
+    <span class="case-chain"><b>Контроль над потоком</b></span>
     <span class="case-open">Открыть кейс <i aria-hidden="true">→</i></span>
   </span>
 </a>
@@ -168,15 +186,80 @@
       <circle class="case-pin" cx="524.9" cy="112.3" r="8.0"></circle>
     </svg>
     <span class="case-num" aria-hidden="true">08</span>
+    <span class="case-sigil" aria-hidden="true"><svg class="sigil" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect x="5" y="7" width="9" height="9"/><rect x="18" y="7" width="9" height="9"/><rect x="5" y="18" width="9" height="9"/><rect x="18" y="18" width="9" height="9"/></svg></span>
     <span class="case-place">Весь корпус</span>
   </span>
   <span class="case-body">
     <span class="case-kicker">Неделя 8 · Выставка и рецензирование</span>
     <h3>Своя карта: конференция и взаимное рецензирование</h3>
     <span class="case-short">Восемь артефактов складываются в один портфель. Студенты защищают работы и пишут рецензии друг другу.</span>
+    <span class="case-chain"><b>Синтез: один механизм из восьми</b></span>
     <span class="case-open">Открыть кейс <i aria-hidden="true">→</i></span>
   </span>
 </a></div>
+    <div class="case-table-wrap js-only" id="case-table" hidden>
+      <table class="case-table">
+        <caption class="sr-only">Восемь кейсов курса</caption>
+        <thead><tr><th scope="col">№</th><th scope="col">Кейс</th><th scope="col">Место</th><th scope="col">Формат</th><th scope="col">Механизм</th><th scope="col">Артефакт</th></tr></thead>
+        <tbody><tr data-format="dispute">
+      <td>01</td>
+      <td><a href="/seminars/01-djibouti/">База в Джибути: три взгляда на одну точку</a></td>
+      <td>Джибути</td>
+      <td>SAC</td>
+      <td>Интерес → ставка → издержка</td>
+      <td>Карта причинности</td>
+    </tr><tr data-format="simulation">
+      <td>02</td>
+      <td><a href="/seminars/02-chokepoints/">Горло мира: три пролива и цена зависимости</a></td>
+      <td>Ормузский пролив</td>
+      <td>Симуляция</td>
+      <td>Уязвимость ↔ взаимозависимость</td>
+      <td>Атлас узких мест</td>
+    </tr><tr data-format="jigsaw">
+      <td>03</td>
+      <td><a href="/seminars/03-unrecognized/">Непризнанные: суверенитет как практика</a></td>
+      <td>Тайвань · Сомалиленд · Приднестровье</td>
+      <td>Jigsaw</td>
+      <td>Признание, территория, работающее государство</td>
+      <td>Сравнительная матрица</td>
+    </tr><tr data-format="negotiation">
+      <td>04</td>
+      <td><a href="/seminars/04-minerals/">Ресурсный треугольник: литий, кобальт, редкозёмы</a></td>
+      <td>Атакама · ДР Конго · Китай</td>
+      <td>Игра</td>
+      <td>Цепочка поставок как рычаг</td>
+      <td>Атлас цепочки</td>
+    </tr><tr data-format="redteam">
+      <td>05</td>
+      <td><a href="/seminars/05-ports/">Порт как власть: коридоры, концессии, долг</a></td>
+      <td>Гвадар</td>
+      <td>Red team</td>
+      <td>Инфраструктура как долгосрочная связка</td>
+      <td>Меморандум по порту</td>
+    </tr><tr data-format="court">
+      <td>06</td>
+      <td><a href="/seminars/06-climate/">Климат против территории: кто отвечает за тонущее государство</a></td>
+      <td>Арктика · Тувалу</td>
+      <td>Суд</td>
+      <td>Право, время и ответственность</td>
+      <td>Правовой меморандум</td>
+    </tr><tr data-format="sprint">
+      <td>07</td>
+      <td><a href="/seminars/07-cables/">Кабели, спутники, данные: география без территории</a></td>
+      <td>Сингапур</td>
+      <td>Спринт</td>
+      <td>Контроль над потоком</td>
+      <td>Риск-реестр</td>
+    </tr><tr data-format="exhibition">
+      <td>08</td>
+      <td><a href="/seminars/08-final/">Своя карта: конференция и взаимное рецензирование</a></td>
+      <td>Весь корпус</td>
+      <td>Выставка и рецензирование</td>
+      <td>Синтез: один механизм из восьми</td>
+      <td>Итоговое портфолио</td>
+    </tr></tbody>
+      </table>
+    </div>
     <p class="filter-empty js-only" hidden>В этом формате пока нет кейсов.</p>
   </div>
 </section>

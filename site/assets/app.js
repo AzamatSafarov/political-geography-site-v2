@@ -33,6 +33,7 @@
   if (filter && grid) {
     var chips = Array.prototype.slice.call(filter.querySelectorAll(".chip"));
     var cards = Array.prototype.slice.call(grid.querySelectorAll(".case"));
+    var rows = Array.prototype.slice.call(document.querySelectorAll(".case-table tbody tr"));
     var status = document.querySelector(".filter-status");
     var empty = document.querySelector(".filter-empty");
     var total = cards.length;
@@ -43,6 +44,9 @@
         var hit = key === "all" || card.getAttribute("data-format") === key;
         card.hidden = !hit;
         if (hit) shown++;
+      });
+      rows.forEach(function (row) {
+        row.hidden = !(key === "all" || row.getAttribute("data-format") === key);
       });
       chips.forEach(function (chip) {
         var on = chip.getAttribute("data-filter") === key;
@@ -60,6 +64,50 @@
     chips.forEach(function (chip) {
       chip.addEventListener("click", function () {
         apply(chip.getAttribute("data-filter"));
+      });
+    });
+  }
+
+  // ---------------------------------------------------------------- list view
+
+  var viewButtons = Array.prototype.slice.call(document.querySelectorAll("[data-view]"));
+  var tableWrap = document.getElementById("case-table");
+  if (viewButtons.length && tableWrap && grid) {
+    var setView = function (view) {
+      grid.hidden = view === "table";
+      tableWrap.hidden = view !== "table";
+      viewButtons.forEach(function (btn) {
+        btn.setAttribute("aria-pressed", btn.getAttribute("data-view") === view ? "true" : "false");
+      });
+    };
+    viewButtons.forEach(function (btn) {
+      btn.addEventListener("click", function () { setView(btn.getAttribute("data-view")); });
+    });
+  }
+
+  // ---------------------------------------------------------------- route
+
+  var routeStops = Array.prototype.slice.call(document.querySelectorAll(".route-stop"));
+  if (routeStops.length) {
+    var panels = Array.prototype.slice.call(document.querySelectorAll(".route-panel"));
+    var activate = function (n) {
+      routeStops.forEach(function (stop) {
+        var on = stop.getAttribute("data-route") === n;
+        stop.classList.toggle("is-active", on);
+        if (on) stop.setAttribute("aria-current", "step");
+        else stop.removeAttribute("aria-current");
+      });
+      panels.forEach(function (panel) {
+        panel.hidden = panel.getAttribute("data-panel") !== n;
+      });
+    };
+    routeStops.forEach(function (stop) {
+      var n = stop.getAttribute("data-route");
+      stop.addEventListener("mouseenter", function () { activate(n); });
+      stop.addEventListener("focus", function () { activate(n); });
+      stop.addEventListener("click", function (event) {
+        event.preventDefault();
+        activate(n);
       });
     });
   }

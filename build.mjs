@@ -12,6 +12,7 @@ const ROOT = path.dirname(decodeURIComponent(new URL(import.meta.url).pathname).
 const OUT = path.join(ROOT, "site");
 const SITE = "https://political-geography-v2.vercel.app";
 const content = JSON.parse(fs.readFileSync(path.join(ROOT, "content.json"), "utf8"));
+const extra = JSON.parse(fs.readFileSync(path.join(ROOT, "content-extra.json"), "utf8"));
 const geo = JSON.parse(fs.readFileSync(path.join(ROOT, "assets", "data", "ne_110m_land.geojson"), "utf8"));
 const rings = loadRings(geo);
 const { meta, hero, aim, principles, seminars, assessment, methodology, artifacts_page, faq } = content;
@@ -20,6 +21,10 @@ const e = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;
 const pad = (n) => String(n).padStart(2, "0");
 const shortFormat = new Map(methodology.formats.map((f) => [f.name, f.short]));
 const readingCount = seminars.reduce((n, s) => n + s.reading.length, 0);
+const caseArticles = extra.articles.filter((a) => a.kind === "case");
+const methodArticles = extra.articles.filter((a) => a.kind === "method");
+const articleFor = (n) => caseArticles.find((a) => a.seminar === n);
+const people = extra.people || {};
 
 // ---------------------------------------------------------------- visual system
 
@@ -48,6 +53,53 @@ const PAGE_ACCENT = {
 };
 
 const mark = (cls = "mark") => `<svg class="${cls}" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect width="40" height="40" fill="#0C1E2A"/><circle cx="20" cy="19" r="11" fill="none" stroke="#F6F1E7" stroke-width="1.6"/><path d="M9 19h22M20 8c5 5 5 17 0 22M20 8c-5 5-5 17 0 22" stroke="#F6F1E7" stroke-width="1" opacity=".5" fill="none"/><circle cx="27" cy="12" r="4.2" fill="#C24B2A" stroke="#0C1E2A" stroke-width="1.6"/></svg>`;
+
+// Case sigils: a visual mark per case, instead of a flag. Three of the eight
+// cases are disputed or multi-place, so a flag would either be wrong or pick
+// a side. These marks are drawn once and reused on cards, the route and the
+// case header.
+const SIGILS = {
+  1: '<path d="M16 5l4 7h-8z"/><circle cx="16" cy="18" r="2.5"/><path d="M16 20.5V27M9 27h14M7 12l6 3M25 12l-6 3"/>',
+  2: '<path d="M6 4c4 4 4 9 2 13s-2 8 0 11M26 4c-4 4-4 9-2 13s2 8 0 11"/><path d="M13 16h6"/>',
+  3: '<rect x="7" y="7" width="18" height="18" rx="2" stroke-dasharray="3 3"/><path d="M13 13h6v6h-6z"/>',
+  4: '<path d="M16 4l9 6v12l-9 6-9-6V10z"/><path d="M16 4v24M7 10l9 6 9-6"/>',
+  5: '<path d="M7 27V7h13M7 12h13M13 12v8M20 12l4 4v11"/><path d="M5 27h22"/>',
+  6: '<circle cx="22" cy="9" r="4"/><path d="M4 20c3-3 6-3 9 0s6 3 9 0 6-3 9 0"/><path d="M4 26c3-3 6-3 9 0s6 3 9 0 6-3 9 0"/>',
+  7: '<path d="M4 24c6 0 6-14 12-14s6 14 12 14"/><circle cx="4" cy="24" r="2"/><circle cx="16" cy="10" r="2"/><circle cx="28" cy="24" r="2"/>',
+  8: '<rect x="5" y="7" width="9" height="9"/><rect x="18" y="7" width="9" height="9"/><rect x="5" y="18" width="9" height="9"/><rect x="18" y="18" width="9" height="9"/>',
+};
+
+function caseSigil(n) {
+  return `<svg class="sigil" viewBox="0 0 32 32" aria-hidden="true" focusable="false">${SIGILS[n] || SIGILS[1]}</svg>`;
+}
+
+function mechanismChain(text, cls = "chain") {
+  const parts = text.split(/(\s*(?:→|↔)\s*)/).map((s) => s.trim()).filter(Boolean);
+  if (parts.length < 3) return `<span class="${cls}"><b>${e(text)}</b></span>`;
+  return `<span class="${cls}">${parts.map((p) => /^(→|↔)$/.test(p)
+    ? `<i aria-hidden="true">${p}</i>`
+    : `<b>${e(p)}</b>`).join("")}</span>`;
+}
+
+function personMark(initials, extraClass = "") {
+  return `<span class="person-mark ${extraClass}" aria-hidden="true">${e(initials)}</span>`;
+}
+
+function personLine(name, initials, bio) {
+  return `<span class="person-line">${personMark(initials, "person-mark--sm")}<span class="person-text"><b>${e(name)}</b><i>${e(bio)}</i></span></span>`;
+}
+
+function articleCard(a, accent = null, wide = false) {
+  const color = accent || (a.seminar ? theme(a.seminar).accent : PAGE_ACCENT.methodology);
+  return `<article class="article-card${wide ? " article-card--wide" : ""}" style="--accent:${color}">
+  <span class="article-band"><span>${a.kind === "method" ? "К методике" : "Статья к кейсу"}</span><span>КиберЛенинка</span></span>
+  <h3><a href="${e(a.link)}" target="_blank" rel="noopener">${e(a.title)}</a></h3>
+  <p class="article-meta">${e(a.displayAuthors)} · ${e(a.journal)} · ${e(a.year)}</p>
+  <p class="article-ann">${e(a.annotation)}</p>
+  <span class="article-author">${personMark(a.initials, "person-mark--sm")}<span class="person-text"><b>${e(a.displayAuthors)}</b><i>${e(a.authorBio)}</i></span></span>
+  <a class="article-link" href="${e(a.link)}" target="_blank" rel="noopener">Читать статью <span aria-hidden="true">↗</span></a>
+</article>`;
+}
 
 // ---------------------------------------------------------------- maps
 
@@ -158,12 +210,14 @@ function caseCard(s, root) {
       <circle class="case-pin" cx="${t.cx.toFixed(1)}" cy="${t.cy.toFixed(1)}" r="${(t.r * 1.15).toFixed(1)}"></circle>
     </svg>
     <span class="case-num" aria-hidden="true">${pad(s.n)}</span>
+    <span class="case-sigil" aria-hidden="true">${caseSigil(s.n)}</span>
     <span class="case-place">${e(s.place)}</span>
   </span>
   <span class="case-body">
     <span class="case-kicker">${e(s.week)} · ${e(shortFormat.get(s.format) || s.format)}</span>
     <h3>${e(s.title)}</h3>
     <span class="case-short">${e(s.short)}</span>
+    ${mechanismChain(s.mechanism, "case-chain")}
     <span class="case-open">Открыть кейс <i aria-hidden="true">→</i></span>
   </span>
 </a>`;
@@ -290,6 +344,7 @@ function accessBadge(r) {
 }
 
 function sourceCard(r, i) {
+  const person = people[r.author];
   return `<article class="source">
   <span class="source-n">${pad(i + 1)}</span>
   <div class="source-cite">
@@ -297,6 +352,7 @@ function sourceCard(r, i) {
     <p class="source-title">${e(r.title)}</p>
     <p class="source-year">${e(r.year)}</p>
     <span class="source-access">${accessBadge(r)}</span>
+    ${person ? personLine(r.author, person.initials, person.bio) : ""}
   </div>
   <div class="source-body">
     <p class="source-note">${e(r.note)}</p>
@@ -311,8 +367,10 @@ function readingBlock(s) {
 
 function bookCover(r, s) {
   const t = theme(s.n);
+  const person = people[r.author];
   return `<article class="book" style="--accent:${t.accent};--deep:${t.deep}">
   <span class="book-top">Семинар ${pad(s.n)}</span>
+  ${person ? personMark(person.initials) : ""}
   <span class="book-author">${e(r.author)}</span>
   <span class="book-title">${e(r.title)}</span>
   <span class="book-foot"><span>${e(r.year)}</span><span>${e(shortFormat.get(s.format) || s.format)}</span></span>
@@ -403,6 +461,39 @@ function runnerDialog(s) {
 </dialog>`;
 }
 
+// ---------------------------------------------------------------- route
+
+const ROUTE_LABELS = ["Интерес", "Уязвимость", "Признание", "Цепочка", "Инфраструктура", "Право", "Поток", "Синтез"];
+
+function routeSection() {
+  const stops = seminars.map((s) => `<li>
+    <a class="route-stop${s.n === 1 ? " is-active" : ""}" href="/seminars/${s.slug}/" data-route="${s.n}" aria-label="Кейс ${pad(s.n)}: ${e(s.title)}">
+      <span class="route-sigil" aria-hidden="true">${caseSigil(s.n)}</span>
+      <span class="route-n">${pad(s.n)} · ${e(s.week)}</span>
+      <b>${e(ROUTE_LABELS[s.n - 1])}</b>
+    </a>
+  </li>`).join("");
+  const panels = seminars.map((s) => `<article class="route-panel" data-panel="${s.n}"${s.n === 1 ? "" : " hidden"}>
+    <div class="route-panel-head">
+      <p class="eyebrow">${e(s.week)} · ${e(shortFormat.get(s.format) || s.format)}</p>
+      <h3>${e(s.title)}</h3>
+    </div>
+    <p class="route-q">${e(s.question)}</p>
+    <div class="route-panel-foot">
+      <span>${e(s.place)}</span>
+      <a class="link-arrow" href="/seminars/${s.slug}/">Открыть кейс <span aria-hidden="true">→</span></a>
+    </div>
+  </article>`).join("");
+
+  return `<section class="band band--tint" id="route">
+  <div class="wrap">
+    ${secHead("01 · Маршрут", "От интереса к синтезу", "Восемь остановок складываются в один аргумент: от ставки и уязвимости к праву, потоку и синтезу.")}
+    <ol class="route-track">${stops}</ol>
+    <div class="route-panels">${panels}</div>
+  </div>
+</section>`;
+}
+
 // ---------------------------------------------------------------- home
 
 function homePage() {
@@ -434,9 +525,11 @@ function homePage() {
   <div class="wrap hero-map">${worldStage("/")}</div>
 </section>
 
+${routeSection()}
+
 <section class="band" id="cases">
   <div class="wrap">
-    ${secHead("01 · Программа", "Восемь кейсов", "Каждый кейс держит один механизм, один формат работы и один артефакт в GitHub.")}
+    ${secHead("02 · Программа", "Восемь кейсов", "Каждый кейс держит один механизм, один формат работы и один артефакт в GitHub.")}
     <div class="case-grid" id="seminar-grid">${cards}</div>
   </div>
 </section>
@@ -444,7 +537,7 @@ function homePage() {
 <section class="band band--tint" id="aim">
   <div class="wrap aim">
     <div class="aim-main">
-      <p class="eyebrow">02 · ${e(aim.label)}</p>
+      <p class="eyebrow">03 · ${e(aim.label)}</p>
       <h2>${e(aim.title)}</h2>
       <div class="prose">${aim.body.map((p) => `<p>${e(p)}</p>`).join("")}</div>
     </div>
@@ -457,14 +550,14 @@ function homePage() {
 
 <section class="band band--ink" id="principles">
   <div class="wrap">
-    ${secHead("03 · Принципы", "Три принципа", "", true)}
+    ${secHead("04 · Принципы", "Три принципа", "", true)}
     <ol class="principles">${pr}</ol>
   </div>
 </section>
 
 <section class="band" id="method">
   <div class="wrap">
-    ${secHead("04 · Как устроены 90 минут", "Вход, работа, фиксация", "Середина меняется от кейса к кейсу. Ритм остаётся.")}
+    ${secHead("05 · Как устроены 90 минут", "Вход, работа, фиксация", "Середина меняется от кейса к кейсу. Ритм остаётся.")}
     <ol class="tact-grid">${tacts}</ol>
     <div class="assess-teaser">
       <div>
@@ -483,7 +576,7 @@ function homePage() {
 
 <section class="band band--tint" id="reading">
   <div class="wrap">
-    ${secHead("05 · Литература", "Что читать", `${readingCount} источника с аннотациями: три на каждый кейс.`)}
+    ${secHead("06 · Литература", "Что читать", `${readingCount} источника с аннотациями: три на каждый кейс.`)}
     <div class="book-row">${covers}</div>
     <a class="link-arrow" href="/reading/">Вся литература по кейсам <span aria-hidden="true">→</span></a>
   </div>
@@ -514,6 +607,14 @@ function seminarsPage() {
     return `<button class="chip" type="button" data-filter="${e(s.format_key)}" aria-pressed="false">${e(label)} <span>${count}</span></button>`;
   }).join("");
   const cards = seminars.map((s) => caseCard(s, "/")).join("\n    ");
+  const rows = seminars.map((s) => `<tr data-format="${e(s.format_key)}">
+      <td>${pad(s.n)}</td>
+      <td><a href="/seminars/${s.slug}/">${e(s.title)}</a></td>
+      <td>${e(s.place)}</td>
+      <td>${e(shortFormat.get(s.format) || s.format)}</td>
+      <td>${e(s.mechanism)}</td>
+      <td>${e(s.artifact.name)}</td>
+    </tr>`).join("");
 
   const body = `${pageHead({ plate: "Программа", label: "8 кейсов", title: "Кейсы", lead: e(hero.thesis) })}
 <section class="band">
@@ -523,7 +624,18 @@ function seminarsPage() {
       ${chips}
     </div>
     <p class="filter-status js-only">Показаны все 8 кейсов</p>
+    <div class="view-switch js-only" role="group" aria-label="Вид списка">
+      <button type="button" data-view="cards" aria-pressed="true">Карточки</button>
+      <button type="button" data-view="table" aria-pressed="false">Таблица</button>
+    </div>
     <div class="case-grid" id="seminar-grid">${cards}</div>
+    <div class="case-table-wrap js-only" id="case-table" hidden>
+      <table class="case-table">
+        <caption class="sr-only">Восемь кейсов курса</caption>
+        <thead><tr><th scope="col">№</th><th scope="col">Кейс</th><th scope="col">Место</th><th scope="col">Формат</th><th scope="col">Механизм</th><th scope="col">Артефакт</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
     <p class="filter-empty js-only" hidden>В этом формате пока нет кейсов.</p>
   </div>
 </section>`;
@@ -571,7 +683,10 @@ function seminarPage(s) {
 <header class="case-hero" style="--accent:${t.accent};--deep:${t.deep};--soft:${t.soft}">
   <div class="wrap case-hero-grid">
     <div class="case-hero-copy">
-      <p class="eyebrow eyebrow--light"><span class="tick" aria-hidden="true"></span>Кейс ${pad(s.n)} · ${e(s.week)}</p>
+      <div class="case-hero-top">
+        <span class="case-sigil case-sigil--hero" aria-hidden="true">${caseSigil(s.n)}</span>
+        <p class="eyebrow eyebrow--light"><span class="tick" aria-hidden="true"></span>Кейс ${pad(s.n)} · ${e(s.week)}</p>
+      </div>
       <h1>${e(s.title)}</h1>
       <p class="case-lead">${e(s.short)}</p>
       <div class="case-actions">
@@ -585,7 +700,7 @@ function seminarPage(s) {
     <div><span>Место</span><b>${e(s.place)}</b></div>
     <div><span>${isCorpus ? "Схема" : "Координаты"}</span><b>${e(s.coords)}</b></div>
     <div><span>Формат</span><b>${e(s.format)}</b></div>
-    <div><span>Механизм</span><b>${e(s.mechanism)}</b></div>
+    <div><span>Механизм</span><b>${mechanismChain(s.mechanism, "chain chain--light")}</b></div>
   </div>
 </header>
 
@@ -678,8 +793,9 @@ function seminarPage(s) {
 
 <section class="band" id="reading">
   <div class="wrap">
-    ${secHead("06 · Источники", "Три источника", "К каждому кейсу: справочник, аналитика и пример жанра.")}
+    ${secHead("06 · Источники", "Три источника и статья", "Три источника кейса и одна открытая статья с КиберЛенинки.")}
     ${readingBlock(s)}
+    ${articleFor(s.n) ? `<div class="article-feature">${articleCard(articleFor(s.n), t.accent, true)}</div>` : ""}
     <a class="link-arrow" href="/reading/">Вся литература курса <span aria-hidden="true">→</span></a>
   </div>
 </section>
@@ -798,6 +914,16 @@ function methodologyPage() {
         <span class="format-where">${e(f.where)}</span>
       </div>
     </li>`).join("");
+  const kolb = [
+    ["01", "Опыт", "Вход", "Письменный ответ на вопрос, без обсуждения. Студент достаёт из памяти то, что уже есть."],
+    ["02", "Рефлексия", "Работа", "Формат семинара: что произошло, где рассыпалась цепочка, чей аргумент оказался сильнее."],
+    ["03", "Концептуализация", "Рамка", "Критерии и механизм: какое объяснение выдерживает проверку, а какое только звучит убедительно."],
+    ["04", "Эксперимент", "Артефакт", "Артефакт и следующий семинар: что я сделаю иначе и как это проверю."],
+  ].map(([n, title, time, text]) => `<li class="kolb-step">
+      <span class="kolb-n">${n}</span>
+      <div><span class="kolb-time">${time}</span><h3>${title}</h3><p>${text}</p></div>
+    </li>`).join("");
+
   const neighbors = methodology.neighbors.items.map((n) => {
     const name = n.link
       ? `<a href="${e(n.link)}" target="_blank" rel="noopener">${e(n.name)} <span aria-hidden="true">↗</span></a>`
@@ -817,31 +943,39 @@ function methodologyPage() {
   </div>
 </section>
 
-<section class="band band--tint" id="icap">
+<section class="band band--tint" id="cycle">
   <div class="wrap">
-    ${secHead("02 · Шкала", e(methodology.icap.title), e(methodology.icap.text))}
+    ${secHead("02 · Как мы учимся", "Цикл Колба внутри 90 минут", "Семинар устроен как один виток цикла Колба. Между семинарами виток повторяется: фиксация становится входом следующего.")}
+    <ol class="kolb-grid">${kolb}</ol>
+    <div class="method-reading">${methodArticles.map((a) => articleCard(a, PAGE_ACCENT.methodology)).join("")}</div>
+  </div>
+</section>
+
+<section class="band" id="icap">
+  <div class="wrap">
+    ${secHead("03 · Шкала", e(methodology.icap.title), e(methodology.icap.text))}
     <ol class="icap-grid">${levels}</ol>
   </div>
 </section>
 
-<section class="band" id="formats">
+<section class="band band--tint" id="formats">
   <div class="wrap">
-    ${secHead("03 · Форматы", "Восемь форматов и где они ломаются")}
+    ${secHead("04 · Форматы", "Восемь форматов и где они ломаются")}
     <ol class="formats">${formats}</ol>
   </div>
 </section>
 
 <section class="band band--ink" id="thirty">
   <div class="wrap group-note">
-    <p class="eyebrow eyebrow--warm">04 · 30 человек</p>
+    <p class="eyebrow eyebrow--warm">05 · 30 человек</p>
     <h2>Одна комната, один преподаватель</h2>
     <p>${e(methodology.group_note)}</p>
   </div>
 </section>
 
-<section class="band band--tint" id="neighbors">
+<section class="band" id="neighbors">
   <div class="wrap">
-    ${secHead("05 · Контекст", e(methodology.neighbors.title), e(methodology.neighbors.intro))}
+    ${secHead("06 · Контекст", e(methodology.neighbors.title), e(methodology.neighbors.intro))}
     <ol class="neighbors">${neighbors}</ol>
   </div>
 </section>`;
@@ -927,7 +1061,7 @@ function literaturePage() {
     ${readingBlock(s)}
   </section>`).join("");
 
-  const body = `${pageHead({ plate: "Литература", label: `${readingCount} источника`, title: "Что читать к каждому кейсу", lead: "Три источника на семинар: справочник, аналитика и пример жанра. У каждого есть аннотация и пометка о доступе." })}
+  const body = `${pageHead({ plate: "Литература", label: `${readingCount} источника и 10 статей`, title: "Что читать к каждому кейсу", lead: "Три источника и открытая статья на каждый кейс. У статей указаны авторы и короткая справка, у книг — пометка о доступе." })}
 <section class="band band--paper" id="core">
   <div class="wrap">
     ${secHead("01 · Основное", "Восемь книг", "Первый источник каждого кейса. Обложки собраны типографикой, без чужих изображений.")}
@@ -935,9 +1069,16 @@ function literaturePage() {
   </div>
 </section>
 
-<section class="band band--tint" id="note">
+<section class="band band--tint" id="articles">
+  <div class="wrap">
+    ${secHead("02 · Статьи", "Открытые статьи", "Восемь статей к кейсам и две про методику. Все доступны на КиберЛенинке.")}
+    <div class="article-grid">${extra.articles.map((a) => articleCard(a)).join("")}</div>
+  </div>
+</section>
+
+<section class="band band--paper" id="note">
   <div class="wrap access-note">
-    <p class="eyebrow">Доступ</p>
+    <p class="eyebrow">03 · Доступ</p>
     <p>Ссылка ведёт туда, где источник опубликован. Два издания выходят без открытой ссылки: они помечены «закрытый доступ · в библиотеке». Мы не подменяем их ссылками на неофициальные копии.</p>
   </div>
 </section>
